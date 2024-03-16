@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="forEachFlow" doc:id="ee676d95-3b40-4d23-9f56-0261d9d642ec" >
+		<http:listener doc:name="Http_listener" doc:id="ee8e7638-f6cd-4f65-b6b7-b351f3a3ae9b" config-ref="HTTP_Listener_config" path="/foreach" doc:description="http://localhost:6061/development/foreach"/>
+		<logger level="INFO" doc:name="Start Each" doc:id="d86e30be-b435-4e9b-b372-b265eb59bc17" message="Start Each"/>
+        <set-payload value="#[25 to 30]" doc:name="Array of values" doc:id="tmamxn"/>
+		<foreach doc:name="For Each" doc:id="65b51e89-7f0a-41bb-b871-81a0abbab865" collection="#[payload]">
+			<ee:transform doc:name="Add 2 in For each" doc:id="fdc5d5ed-583b-404d-b8c6-cb61a7f20987">
+				<ee:message>
+					<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload + 2]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+			<logger level="INFO" doc:name="Print Payload" doc:id="a1d62484-658c-47af-acd1-470d9b31bc7e" message="#[payload]"/>
+		</foreach>
+		<ee:transform doc:name="Output after for each" doc:id="da4936c6-b62f-4c23-92b3-39501c3ce55d" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"thePayload": payload,
+	"timeTaken": now()
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Print Payload" doc:id="e9f83f90-9fca-4187-881c-e69c62b0a8d5" message="#[payload]" />
+	</flow>
+	<flow name="parallel-for-each" doc:id="f07452c4-f298-4258-b704-95b9bc8b6322" >
+		<http:listener doc:name="HTTP_Listener" doc:id="4befa467-1cc5-48f5-a72b-89053e290177" config-ref="HTTP_Listener_config" path="/paralleleach"/>
+		<logger level="INFO" doc:name="Start Foreach" doc:id="fcdb76c8-734e-4d60-80e3-b4071c940dc5" message="Start Foreach"/>
+		<set-payload value="#[25 to 30]" doc:name="Set Payload" doc:id="6da489c0-be08-4cdc-9685-18943c261339" />
+		<parallel-foreach doc:name="Parallel For Each" doc:id="cc1cd075-4a40-4532-88cf-11edc3422c35" target="outputofForeach">
+			<ee:transform doc:name="Add 2 in For each" doc:id="744a3299-a936-4be5-8b4a-d2dd1460517c">
+				<ee:message>
+					<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload + 2]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+			<logger level="INFO" doc:name="Logger" doc:id="2f38053f-da29-40a4-9b75-af3fe4cf7119" message="#[payload]" />
+		</parallel-foreach>
+		<ee:transform doc:name="Transform Message" doc:id="f7c93c18-596e-43a6-a4ff-5bd1acf8c477" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="variable" ><![CDATA[ vars.outputofForeach.payload]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<ee:transform doc:name="Output after Parallel for each" doc:id="a4967e07-66a3-42a0-a7e0-ebcca85c8d9b" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+"thePayload": payload ,	
+	"timeTaken": now() ,
+	"parallel": vars.variable
+
+}]]></ee:set-payload>
+			</ee:message>
+			<ee:variables />
+		</ee:transform>
+		<logger level="INFO" doc:name="End of for each" doc:id="c8abf5da-066c-40be-9cc9-215a1e55764f" message="#[payload]"/>
+	</flow>
+</mule>

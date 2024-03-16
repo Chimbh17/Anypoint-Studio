@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	<flow name="connector-componentFlow" doc:id="396b0d12-2a85-4d89-bd3a-106972a829ad" >
+		<http:listener doc:name="Listener" doc:id="aef2b59d-5788-4bc7-82fe-869d896961f9" config-ref="HTTP_Listener_config" path="/scatter-gather"/>
+		<logger level="INFO" doc:name="Logger" doc:id="d6d88c3d-11eb-4230-9cdc-7d101f34b65f" message="Started scatter-gather flow"/>
+		<scatter-gather doc:name="Scatter-Gather" doc:id="7846803d-84a4-4eb0-9e5a-6a0cf709889e" >
+			<route >
+				<set-payload value="Apple" doc:name="Set Payload  Apple" doc:id="9dc753f4-1138-459d-b98b-aaf22c3c9498" />
+			</route>
+			<route >
+				<set-payload value="mango" doc:name="Set Payload mango" doc:id="69a19088-249f-4257-bd07-7bccfd23f12b" />
+			</route>
+		</scatter-gather>
+		<logger level="INFO" doc:name="Logger" doc:id="a19b46d3-93c7-4db6-ad5f-9ebd63daabbf" message='#[payload."0".payload]'/>
+	</flow>
+</mule>

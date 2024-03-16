@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:batch="http://www.mulesoft.org/schema/mule/ee/batch" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+	http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+	http://www.mulesoft.org/schema/mule/ee/batch http://www.mulesoft.org/schema/mule/ee/batch/current/mule-batch.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="asycnAndChoiceFlow">
+		<http:listener path="/asyncchoice"
+			config-ref="HTTP_Listener_config" doc:name="AsyncChoice"
+			doc:id="sczzmd" />
+		<logger doc:name="Main Started - Before Async Scope"
+			doc:id="pnmrms" message="Main Started - Before Async Scope" />
+		<set-payload
+			value='#[{&#10;    "ip": "000.00.00.01",&#10;    "hostname": "mspapi-ctwbcp05-finance.nyc.gov",&#10;    "city": "New York City",&#10;    "region": "New York",&#10;    "country": "US",&#10;    "loc": "40.7143,-74.0060",&#10;    "org": "AS22252 The City of New York",&#10;    "postal": "10004",&#10;    "timezone": "America/New_York",&#10;    "readme": "https://ipinfo.io/missingauth"&#10;}]'
+			doc:name="Setting Payload In MainFlow" doc:id="uhghne" />
+		<async doc:name="A-Synchornous (It is not Synchronous)">
+			<logger doc:name="Async Scope Started" doc:id="wwfszo" message="Async Scope Started" level="INFO"/>
+			<flow-ref doc:name="IpinfoHttpPoc_Subflow" name="IpinfoHttpPoc_Subflow" doc:id="8e095f40-9278-4517-b783-f9a40682a10b"/>
+			<choice doc:name="Choice based on IpinfoHttpPoc_Subflow"
+				doc:id="cfc57d24-f89b-4f82-a76c-8e109e69221b">
+				<when expression='#[payload.ip == "161.185.160.99"]'>
+					<logger level="INFO" doc:name="Invoke_AbstractFlowForAsync" doc:id="5e72120c-d63e-4806-bd6b-3a38c8df48b5" message="#[payload]"/>
+					<ee:transform doc:name="Transform Message" doc:id="13ca1b79-eb69-4906-8411-f5c89a0d0f35" >
+						<ee:message >
+							<ee:set-payload ><![CDATA[
+%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+						</ee:message>
+					</ee:transform>
+				</when>
+				<otherwise >
+					<logger level="INFO" doc:name="Default Logger" doc:id="bf660e68-afe3-4fad-893b-fbbf0b24b019" message="Default Logger"/>
+					<ee:transform doc:name="Transform Message" doc:id="31e1099d-1ac9-479a-a830-8a47148ab906" >
+						<ee:message >
+							<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+						</ee:message>
+					</ee:transform>
+				</otherwise>
+			
+</choice>
+			<logger level="INFO" doc:name="Async Scope Ended" doc:id="312cf6a4-8dc7-40b5-b7f0-c1e4176b9584" message="Async Scope Ended"/>
+
+		
+</async>
+		<ee:transform doc:name="Transform Message" doc:id="4972ca2f-45d6-4e9f-a164-8a25cf096069" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Main Ended - After Async Scope" doc:id="89c3d162-4b31-43a3-a3fa-03bff9796700" message="Main Ended - After Async Scope" />
+
+	
+</flow>
+	<sub-flow name="IpinfoHttpPoc_Subflow" doc:id="57499ca6-1f19-4288-81c9-0f5d1f420c1a" >
+		<logger level="INFO" doc:name="IPInfo Started" doc:id="34e7bb54-3f6f-41fb-8fb8-977b1a5543c2" message="IPInfo Started" />
+		<http:request method="GET" doc:name="Invoke IPInfo" doc:id="72f33007-8803-4859-9d1f-1d410107fae5" url="https://ipinfo.io/161.185.160.99/geo">
+		</http:request>
+		<logger level="INFO" doc:name="IPInfo Ended" doc:id="f75612fd-510c-4481-9f0f-da827d313f7a" message="IPInfo Ended" />
+	</sub-flow>
+	<sub-flow name="AbstractFlowForAsync" doc:id="3e2b8051-d4ce-437d-b3d5-eed9934471e6" >
+		<logger level="INFO" doc:name="AbstractFlowForAsync Started" doc:id="6ddc24d8-2ae6-4def-8d18-1319ec400826" message="AbstractFlowForAsync Started" />
+		<set-payload value='#[{&#10;    "ip": "100.00.00.00",&#10;    "hostname": "Abstract Flow",&#10;    "city": "New York City",&#10;    "region": "New York",&#10;    "country": "US",&#10;    "loc": "40.7143,-74.0060",&#10;    "org": "AS22252 The City of New York",&#10;    "postal": "10004",&#10;    "timezone": "America/New_York",&#10;    "readme": "https://ipinfo.io/missingauth"&#10;}]' doc:name="Set Payload" doc:id="fd8333f1-7766-404b-a7e2-272a478b4a60" />
+		<logger level="INFO" doc:name="AbstractFlowForAsync Ended" doc:id="976a7a76-3d0c-4302-88e9-a8d5ef448986" message="AbstractFlowForAsync Ended" />
+	</sub-flow>
+
+
+</mule>

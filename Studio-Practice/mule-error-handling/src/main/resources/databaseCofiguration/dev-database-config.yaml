@@ -1,0 +1,12 @@
+OracleDatabase:
+  host: "localhost" 
+  port: "1521"
+  user: "system" 
+  password: "![a1InFRrYfE2R4B+sklV/QQ==]"
+
+
+MySQLDatabase:
+  host: "localhost" 
+  port: "3306"
+  user: "root" 
+  password: "![a1InFRrYfE2R4B+sklV/QQ==]"

@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce" xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+	http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd">
+	<flow name="implement-sc-dbFlow" doc:id="c4f2833b-7f18-499e-9461-0c65157557fe" >
+		<http:listener doc:name="Listener" doc:id="bab5b885-4974-4c66-94f5-536f96e91b9c" config-ref="HTTP_Listener_config" path="/db-sc"/>
+        <logger doc:name="Logger" doc:id="niygel" message='#["start time" ++ now() as String]'/>
+		<scatter-gather doc:name="Scatter-Gather" doc:id="f0802223-6b2d-40c8-9ff6-40a81b3ae61d" >
+			<route >
+				<db:select doc:name="Select from mysql db" doc:id="597f9706-eb45-44b0-a9ea-a8468a1aee77" config-ref="MySQL_Database_Config">
+					<db:sql ><![CDATA[SELECT * FROM my_db.student ;]]></db:sql>
+				</db:select>
+                <logger doc:name="Logger for mysql" doc:id="mqlaer" message='#["mysql time" ++ now() as String]'/>
+			</route>
+			<route >
+				<db:select doc:name="Select from oracle db" doc:id="a6bd4ec9-3159-4699-aa24-7d9057701ec0" config-ref="Oracle_Database_Config">
+					<db:sql ><![CDATA[select * from student ]]></db:sql>
+				</db:select>
+                <logger doc:name="Logger for oracle db" doc:id="quxial" message='#["oracle time" ++ now() as String]'/>
+			</route>
+		</scatter-gather>
+        <logger doc:name="Logger" doc:id="xgvtug" message='#["end time" ++ now() as String]'/>
+        <ee:transform doc:name="Transform" doc:id="rdcrgn" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<error-handler >
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="34d0314f-349e-43ab-903d-851ae8bbc114" type="DB:CONNECTIVITY">
+				<ee:transform doc:name="Transform Message" doc:id="f76094e5-dbfe-4bd1-8c79-15e58e27cd46" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"errorCode": 478 ,
+	"error": "connecttivity-issue"
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</on-error-continue>
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="885c0de1-00af-4ea8-8cc3-85d3c946bd06" type="EXPRESSION, STREAM_MAXIMUM_SIZE_EXCEEDED">
+				<ee:transform doc:name="Transform" doc:id="8947593a-aedf-404e-9761-d04196e8f113" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"errorCode": 100 ,
+	"error": "other-issue"
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</on-error-propagate>
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="9f703f93-5269-4356-979b-2eca21a090c6" type="ANY">
+				<ee:transform doc:name="Transform" doc:id="f970519d-436d-4993-a1e5-0653199ec8e8">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"errorCode": 444 ,
+	"error": "Any-issue"
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+			</on-error-continue>
+		</error-handler>
+	</flow>
+</mule>

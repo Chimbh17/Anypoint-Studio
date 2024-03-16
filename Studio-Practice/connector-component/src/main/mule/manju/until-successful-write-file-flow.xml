@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd">
+	<flow name="until-successful-write-file-flowFlow" doc:id="643cfb93-798c-498d-83e6-465dcfcc5382" >
+		<http:listener doc:name="Listener" doc:id="b6062657-8e74-4fbb-9754-10ec4b80aa66" config-ref="HTTP_Listener_config" path="/unitsuccesswritefile"/>
+		<until-successful maxRetries="5" doc:name="Until Successful" doc:id="39075ae3-7cf9-4556-950a-7d85b8186d69" millisBetweenRetries="6000">
+			<file:write doc:name="Write Abstract File to FileOperations Directory" doc:id="54b27926-42d9-4f20-b3ac-90350a3bb15b" config-ref="File_Config" path="Abstract.txt" createParentDirectories="false">
+			<file:content><![CDATA[#[%dw 2.0
+output application/json
+---
+{
+    "ip": "161.185.160.98",
+    "hostname": "mspapi-ctwbcp05-fdny.nyc.gov",
+    "city": "New York City",
+    "region": "New York",
+    "country": "America",
+    "loc": "40.7143,-74.0060",
+    "org": "AS22252 The City of New York",
+    "postal": "10004",
+    "timezone": "America/New_York",
+    "readme": "https://ipinfo.io/missingauth"
+}]]]></file:content>
+		</file:write>
+		</until-successful>
+		<file:rename doc:name="Rename" doc:id="9491d51d-4d88-4841-a040-0cbd4301d9d5" config-ref="File_Config" path="Abstract.txt" to="NewAbstract.txt"/>
+		<file:read doc:name="Read" doc:id="500024f6-b95f-4476-8eeb-2f185d8ad500" config-ref="File_Config" path="NewAbstract.txt"/>
+		<logger level="INFO" doc:name="Logger" doc:id="fb2b6efe-571d-4cfe-9c43-eaf070950177" message="#[payload]" />
+		<file:list doc:name="List" doc:id="0572a2b9-75aa-4bcc-afa8-1d4f63d0ec00" config-ref="File_Config" directoryPath="D:\Downloads\filejana\nulesoft"/>
+	</flow>
+</mule>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:secure-properties="http://www.mulesoft.org/schema/mule/secure-properties" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/secure-properties http://www.mulesoft.org/schema/mule/secure-properties/current/mule-secure-properties.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="adf34042-9ab3-4f7d-8860-04454e343d8b" basePath="${httpListener.basePath}" >
+		<http:listener-connection host="${httpListener.host}" port="${httpListener.port}" readTimeout="${httpListener.readTimeout}"/>
+	</http:listener-config>
+	<configuration-properties doc:name="Configuration properties" doc:id="4aad7bd0-9e65-4e8f-a27a-d9ec061dbb0f" file="httpCofiguration/${env}-http-config.yaml" />
+	<http:request-config name="HTTPS_Publicapis.org_Configurations" doc:name="HTTP Request configuration" doc:id="6ad0b660-3e0b-4f71-bb21-75766007da17">
+		<http:request-connection protocol="HTTPS" host="api.publicapis.org" />
+	</http:request-config>
+	<http:request-config name="HTTPS_Agify_configuration" doc:name="HTTP Request configuration" doc:id="10162982-6113-4602-abe3-ec275b2e41d3" >
+		<http:request-connection protocol="HTTPS" host="api.agify.io" />
+	</http:request-config>
+	<http:request-config name="HTTP_datausa.io_configuration" doc:name="HTTP Request configuration" doc:id="65ed4cdf-4108-48f0-91bf-96881adbe174" basePath="/api" >
+		<http:request-connection protocol="HTTPS" host="datausa.io" />
+	</http:request-config>
+	<http:request-config name="HTTP_IP_Invoke_configuration" doc:name="HTTP Request configuration" doc:id="3fcbc750-d68d-4f50-9e64-a32a494d58a1">
+		<http:request-connection protocol="HTTPS" host="ipinfo.io" />
+	</http:request-config>
+</mule>

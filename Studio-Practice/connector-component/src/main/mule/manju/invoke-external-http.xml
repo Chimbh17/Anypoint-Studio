@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd">
+	<flow name="invoke-external-httpFlow" doc:id="49295a31-27b1-4475-b762-6e2f6e18c61c" >
+		<http:listener doc:name="Listener" doc:id="948e692b-1567-4a63-a9b2-7bb7c9b3154d" config-ref="HTTP_Listener_config" path="/invokepublicapiorg"/>
+		<http:request method="GET" doc:name="invoke publicapis.org" doc:id="a3fdd7b6-1b53-48a7-9733-ee8c04365d79" config-ref="HTTPS_Publicapis.org_Configurations" path="/entries"/>
+		<ee:transform doc:name="Transform Message" doc:id="82b0d242-d4a4-49df-8961-23d82fd1109e" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="invoke-agify-api" doc:id="ee426107-3acc-4b5c-a43a-36a40d146349" >
+		<http:listener doc:name="Listener" doc:id="86521770-15cc-44e0-8f41-131ce383de60" config-ref="HTTP_Listener_config" path="/invokeagify" />
+		<set-variable value="#[attributes.queryParams.name]" doc:name="Set Variable" doc:id="7e4a9d87-e5ca-4b8d-bfd2-5b6d352b6b74" variableName="qname"/>
+		<http:request method="GET" doc:name="Invoke Agiify" doc:id="980d7978-9099-4894-b0e2-7954aedfa8d4" config-ref="HTTPS_Agify_configuration" path="?">
+			<http:query-params ><![CDATA[#[{name: vars.qname}]]]></http:query-params>
+		</http:request>
+		<ee:transform doc:name="Transform Message" doc:id="9f235232-941f-429c-838d-cd5961c05fdb" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="invoke-datausa-io" doc:id="8ed0c75e-1a53-4aae-8c41-6716dfe2e7a3" >
+		<http:listener doc:name="Listener" doc:id="f3f65591-4720-4b1a-bca6-0963f0d48c41" config-ref="HTTP_Listener_config" path="/datausa" doc:description="http://localhost:6061/development/datausa?drilldowns=Nation&amp;measures=Population"/>
+		<ee:transform doc:name="Transform Message" doc:id="131b80c2-2462-46a0-9b00-b70ef54dbd27" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="query1" ><![CDATA[attributes.queryParams.drilldowns]]></ee:set-variable>
+				<ee:set-variable variableName="query2" ><![CDATA[
+	
+attributes.queryParams.measures
+]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<http:request method="GET" doc:name="Request" doc:id="74d495d7-2579-426f-b050-c22c441380b9" config-ref="HTTP_datausa.io_configuration" path="/data?">
+			<http:query-params ><![CDATA[#[{
+	drilldowns:  vars.query1 ,
+	  measures: vars.query2
+}]]]></http:query-params>
+		</http:request>
+		<ee:transform doc:name="Transform Message" doc:id="039bc75b-3696-402a-b445-2f0ac4115936" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload.data]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="invoke-ipinfo-httpFlow" doc:id="2de119d0-0dee-4819-b56c-85a43e89bee4" >
+		<http:listener doc:name="Listener" doc:id="243a2bc4-8c59-415f-bf1f-8383df38b083" config-ref="HTTP_Listener_config" path="/invokeipinfo/{passAdreess}/{name}"/>
+		<http:request method="GET" doc:name="Invoke Ip Information" doc:id="bcf3cf34-c66a-4673-a58d-3da69e0fc064" config-ref="HTTP_IP_Invoke_configuration" path="/{value1}/{value2}">
+			<http:body ><![CDATA[#[""]]]></http:body>
+			<http:uri-params ><![CDATA[#[{
+	value1 :  attributes.uriParams.passAdreess,
+	value2 : attributes.uriParams.name
+}]]]></http:uri-params>
+		</http:request>
+		<ee:transform doc:name="Transform Message" doc:id="744ad3dc-d7b4-4bed-aab7-ef71918b86d3" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>

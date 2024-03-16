@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+  xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+	http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+	http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+    <flow name="scatter-gather-mule" >
+        <http:listener path="/scatter-gather-mule" config-ref="HTTP_Listener_config" doc:name="Listener" doc:id="mzgtqd" />
+        <logger doc:name="Before scatter gather" doc:id="pdojls" message="#[payload]"/>
+        <scatter-gather doc:name="Scatter gather" doc:id="vlfgwl" >
+            <route>
+                <set-payload value='#[{&#10;	&#10;	"payload01Name": "Manju",&#10;	"payload01ID": 1,&#10;	"payload01Location": "INDIA",&#10;	"payload01Salary": 2000&#10;}]' doc:name="payload01" doc:id="nbwqkj" />
+                <logger doc:name="Logg payload 01" doc:id="zyvgfi" message="payload 01"/>
+            </route>
+            <route>
+                <set-payload value='#[{&#10;	&#10;	"payload02Name" : "bharat" ,&#10;	"payload01ID": 1,&#10;	"payload02Salary" : 500000 ,&#10;	"payload02Location": "INDIA"&#10;&#10;}]' doc:name="payload02" doc:id="tdgaak" />
+                <logger doc:name="Logg payload 02" doc:id="glowxv" message="payload 02"/>
+            </route>
+			<route >
+				<set-payload value='#[{&#10;	&#10;	"payload03Name" : "bharat" ,&#10;	"payload03SrName" : "chim" ,&#10;	"payload03Salary" : 40000&#10;	&#10;}]' doc:name="payload03" doc:id="b9b17e86-a8e6-40c9-87d7-c8a017de67ed" />
+                <logger doc:name="Log payload 03" doc:id="qdvkie" message="payload 03"/>
+			</route>
+            
+        
+</scatter-gather>
+        <ee:transform doc:name="Transform" doc:id="uicgfd" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="End scatter gather" doc:id="30f130be-9148-4278-9ff6-308e40233830" message="#[payload]"/>
+        
+    
+</flow>
+    
+    
+    
+  
+</mule>

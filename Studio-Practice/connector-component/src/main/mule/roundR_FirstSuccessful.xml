@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	
+	<flow name="Round-Robin" doc:id="f83a6b6b-1b0a-4a4c-aa27-ad89473da565" >
+		<http:listener doc:name="Listener" doc:id="6dafec86-7882-4919-9d0e-45e5959a95bb" config-ref="HTTP_Listener_config" path="/invokefirstsuccess"/>
+		<logger level="INFO" doc:name="Started Round-Robin" doc:id="797ed0bd-a374-48dd-9fdc-5bebc6ee5db9" message="Started FS"/>
+        <round-robin doc:name="Round robin" doc:id="vuariy" >
+     <route >
+				<http:request method="GET" doc:name="Request  API AGIFY" doc:id="48b68287-111a-4740-9d0e-d31d17abbf0e" url="https://api.agify.io?name=meelad"/>
+				<logger level="INFO" doc:name="API AGIFY Logger" doc:id="2ce8e618-5f6f-4a84-9c31-0107e80a71e2" message="Request1 - AGFY- completed for FS - #[payload]"/>
+				<ee:transform doc:name="API AGIFY Transform Message" doc:id="c7e65286-1419-4bf9-9ec3-152699d88bee" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</route>
+			<route >
+				<http:request method="GET" doc:name="Request Geo" doc:id="545f2756-90d6-448e-b4cf-18522d4d33d2" url="https://ipinfo.io/161.185.160.98/geo"/>
+				<logger level="INFO" doc:name="Geo Logger" doc:id="20933f90-f7f8-4456-b215-12d99522d0f2" message="Request2 - GEO - completed for FS - #[payload]"/>
+				<ee:transform doc:name="Geo Transform Message" doc:id="a83850ee-1921-4dee-8f24-d5de5d3e5b1e" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</route>       
+        </round-robin>
+		<ee:transform doc:name="Round-Robin Payload" doc:id="bccdb3fa-df6f-44f1-ab37-086fdf9e5a46" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Ended Round-Robin" doc:id="3bddffc7-cbc9-43c7-a14f-f09dd7eec277" message="Ended FS"/>
+	</flow>
+
+	
+	
+	
+<flow name="First-Successful-Flow" doc:id="f83a6b6b-1b0a-4a4c-aa27-ad89473da565" >
+		<http:listener doc:name="Listener" doc:id="6dafec86-7882-4919-9d0e-45e5959a95bb" config-ref="HTTP_Listener_config" path="/invokefirstsuccess"/>
+		<logger level="INFO" doc:name="Started First-Successful-Flow" doc:id="797ed0bd-a374-48dd-9fdc-5bebc6ee5db9" message="Started FS"/>
+		<first-successful doc:name="First Successful" doc:id="5fcf3521-53ea-4c46-ab5b-aa9200ad85ff" >
+			<route >
+				<http:request method="GET" doc:name="Request  API AGIFY" doc:id="48b68287-111a-4740-9d0e-d31d17abbf0e" url="https://api.agify.io?name=meelad"/>
+				<logger level="INFO" doc:name="API AGIFY Logger" doc:id="2ce8e618-5f6f-4a84-9c31-0107e80a71e2" message="Request1 - AGFY- completed for FS - #[payload]"/>
+				<ee:transform doc:name="API AGIFY Transform Message" doc:id="c7e65286-1419-4bf9-9ec3-152699d88bee" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</route>
+			<route >
+				<http:request method="GET" doc:name="Request Geo" doc:id="545f2756-90d6-448e-b4cf-18522d4d33d2" url="https://ipinfo.io/161.185.160.98/geo"/>
+				<logger level="INFO" doc:name="Geo Logger" doc:id="20933f90-f7f8-4456-b215-12d99522d0f2" message="Request2 - GEO - completed for FS - #[payload]"/>
+				<ee:transform doc:name="Geo Transform Message" doc:id="a83850ee-1921-4dee-8f24-d5de5d3e5b1e" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</route>
+		</first-successful>
+		<ee:transform doc:name="First-Successful-Flow Payload" doc:id="bccdb3fa-df6f-44f1-ab37-086fdf9e5a46" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Ended First-Successful-Flow" doc:id="3bddffc7-cbc9-43c7-a14f-f09dd7eec277" message="Ended FS"/>
+	</flow>
+
+	
+
+</mule>
+

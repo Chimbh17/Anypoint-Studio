@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="raise-errorFlow" doc:id="4a8eba00-cf3d-4eff-b0df-1fb1fe103628" >
+		<http:listener doc:name="Listener" doc:id="c55f82dc-4ca5-456e-9647-5c0071fa2e91" config-ref="HTTP_Listener_config" path="/raiseError">
+			<http:error-response statusCode="#[vars.httpStatus]" reasonPhrase="#[vars.phrase]">
+				<http:body ><![CDATA[#[output application/json --- payload]]]></http:body>
+			</http:error-response>
+		</http:listener>
+		<ee:transform doc:name="Transform Message" doc:id="9903f548-fb7c-40cc-9157-d86b26350c7a" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="transactionId" ><![CDATA[attributes.headers.'x-transaction-id' default uuid()]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<choice doc:name="Choice" doc:id="e3c162ce-40fe-49de-995c-98be0880c632" >
+			<when expression="#[attributes.queryParams.'age' &lt; 15 as Number]">
+				<ee:transform doc:name="Transform Message" doc:id="60757e17-428b-4603-9760-12b61fbc12ab">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"Response": "student age is less than 15"
+	
+}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables>
+						<ee:set-variable variableName="httpStatus"><![CDATA[501]]></ee:set-variable>
+						<ee:set-variable variableName="phrase" ><![CDATA["invalid input"]]></ee:set-variable>
+						<ee:set-variable variableName="transactionId" ><![CDATA[attributes.headers.'x-transaction-id' default uuid()]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+				<raise-error doc:name="Raise error" doc:id="86a549b4-3257-4ca3-82a2-8b09c684fcff" type="STUDENT:INVALID_AGE" description="Student age must be greater than 15"/>
+			</when>
+			<otherwise >
+				<logger level="INFO" doc:name="Logger" doc:id="85b1a212-dcd0-429e-ab08-f9aa3325a5fc" message="#[payload]" />
+				<ee:transform doc:name="Build Output Payload" doc:id="4578787e-7de1-4cec-acd1-d19c53d14c76">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"response": "Success"
+}]]></ee:set-payload>
+			</ee:message>
+					<ee:variables >
+					</ee:variables>
+		</ee:transform>
+			</otherwise>
+		</choice>
+	</flow>
+</mule>
