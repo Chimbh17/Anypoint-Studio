@@ -1,0 +1,7 @@
+%dw 2.0
+
+type auto_2dbeb593_e9f4_42b9_9df9_11d5bf5386a4_Output_Payload = {|
+  errordetails: Null, 
+  errorType: Null
+|}
+

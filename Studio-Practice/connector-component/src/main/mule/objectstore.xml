@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:os="http://www.mulesoft.org/schema/mule/os"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="Invoke01-DefaultOS"
+		doc:id="6f37ca85-9275-4634-8bdd-1c648737627c">
+		<http:listener doc:name="Listener-Invoke01-DefaultOS"
+			doc:id="04002a02-9308-434f-84ea-7626d64e73a1"
+			config-ref="HTTP_Listener_config" path="/objectStore01" />
+		<logger level="INFO" doc:name="Started-OS"
+			doc:id="4b08fe4f-e118-4644-ac7e-f04aa9160d61"
+			message="---😁😁😁😁😁😁Started-OS----#['\n']#[payload]" />
+		<os:retrieve doc:name="Retrieve Default object Store"
+			doc:id="90410649-297b-4429-9699-2e820bee87df" key="holdDefault">
+			<os:default-value><![CDATA[""]]></os:default-value>
+		</os:retrieve>
+		<logger level="INFO" doc:name="Logger"
+			doc:id="820367a5-a053-4e66-b0d9-125a045f84a0" message="#[payload]" />
+		<set-payload value='#[%dw 2.0&#10;output application/json&#10;---&#10;{&#10;	"Key1": "This is Modified Payload Default Object Store😎"&#10;}]' doc:name="Modify Payload" doc:id="a2cf3b13-c2da-4b73-b54d-b0b61036345d" />
+		<os:store doc:name="Store Payload key 1" doc:id="49a4f15c-4b7d-41ea-a333-c19dc0f74a8a" key="holdDefault" />
+		<logger level="INFO" doc:name="Ended-OS" doc:id="dd104ad5-25d3-418f-8e4f-640caff199b9" message="---👨🏻‍🦲👨🏻‍🦲👨🏻‍🦲Ended-OS----#[payload]"/>
+</flow>
+<flow name="Invoke02-OS-NonDefault-DynamicKey" doc:id="48550234-79a4-4efc-a644-5c8d22d9438f" >
+		<http:listener doc:name="Listener-Invoke01-OS" doc:id="cd53f6b1-b3f7-40ed-9a18-ad258a7a0a6a" config-ref="HTTP_Listener_config" path="/objectStore02"/>
+<logger level="INFO" doc:name="Started-Presistance" doc:id="a173e767-ae19-4233-9e3f-533832841528" message="---😁😁😁😁😁😁Started-OS----#['\n']#[payload]" />
+		<set-variable value="#[attributes.queryParams.sendos]" doc:name="Set Variable" doc:id="6fd527db-2990-4721-8d05-a9b21b9f7416" variableName="saveQuerParamOs"/>
+		<os:retrieve doc:name="Retrieve Default object Store" doc:id="fbd06a47-4f97-452d-84a3-5306cf5114a9" key="#[vars.saveQuerParamOs]" objectStore="Persistance-Module01-Object_store">
+			<os:default-value ><![CDATA[#[payload]]]></os:default-value>
+		</os:retrieve>
+		<logger level="INFO" doc:name="Logger" doc:id="e2c2e126-42db-480e-9d2c-862cc4d66d54" message="#[payload]" />
+		<os:store doc:name="Store Payload key 2" doc:id="93a08fbf-c426-4b1b-84d6-1f8aa57970fc" key="#[vars.saveQuerParamOs]" objectStore="Persistance-Module01-Object_store"/>
+		<logger level="INFO" doc:name="Ended-OS" doc:id="fa1a4a6f-b7d2-4985-b70c-9c1a0b5d34ae" message="---🤸🏻‍♀️🤸💦💦💦💦💦💦💦💦💦💦💦💦💦💦💦💦💦💦💦💦Ended-OS--"/>
+		<ee:transform doc:name="Transform Message" doc:id="31829819-f8a3-423d-8418-65867ff4e116" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+
+</flow>
+	<flow name="RetrieveAll" doc:id="3fc1e5be-8335-438c-8a80-0f9eaeef94d2">
+		<http:listener doc:name="Listener" doc:id="f1ebb572-c458-42ef-b5be-26da7a2bb12f" config-ref="HTTP_Listener_config" path="/objectStore03" />
+		<os:retrieve-all doc:name="Retrieve Persistance Details" doc:id="cf0cbbc4-47bd-4c14-8103-b2e3da2a6ad4" objectStore="Non-Persistance-Module01-Object_store" />
+		<logger level="INFO" doc:name="Logger" doc:id="7ed69a74-b58a-4f47-a669-df49b1308dd8" message="🚉🚉🚉🚉🚉🚉🚉🚉🚉💥💥💥" />
+		<ee:transform doc:name="Transform Message" doc:id="ca502fec-8f06-49e5-b913-1d163c459025">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+
+	<flow name="objectstoreFlow" doc:id="089d4054-00e0-45ac-8260-40c3af7b553d" >
+		<http:listener doc:name="Listener" doc:id="999823ef-c809-4afa-9fab-e6d9e05471a2" config-ref="HTTP_Listener_config" path="/objectStore04" />
+		<os:contains doc:name="Contains" doc:id="cbc87e0f-e5ab-4719-a6b8-8c4f42d87a63" objectStore="Persistance-Module01-Object_store" key="saveQuerParamOs"/>
+		<choice doc:name="Choice" doc:id="bc22b338-1f17-49dd-8fec-a0638a429679" >
+			<when expression="#[payload == true]">
+				<os:remove doc:name="Remove-HoldPersistenceKey" doc:id="f32c619b-5e17-408a-92e2-afea85f82d06" objectStore="Persistance-Module01-Object_store" key="saveQuerParamOs"/>
+			</when>
+			<otherwise >
+				<logger level="INFO" doc:name="Logger" doc:id="0a7e8e28-7777-4241-bc37-7e8fad3f5359" message="Tashvini"/>
+			</otherwise>
+		</choice>
+		<ee:transform doc:name="Transform Message" doc:id="b3a73691-a07f-4c21-8d22-4b1ab23a88e6">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+
+</mule>

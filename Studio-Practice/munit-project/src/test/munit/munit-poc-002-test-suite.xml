@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+	<munit:config name="munit-poc-002-test-suite.xml" >
+	
+		
+	</munit:config>
+	<munit:test name="munit-poc-002-test-suite-invoke-munit-poc-002FlowTest" doc:id="de9ab2d7-2c9f-4cc3-b04f-d678b79017c8" description="Test" expectedErrorType="HTTP:CONNECTIVITY">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when HTTP Reqres" doc:id="6ceab88b-ca5f-45eb-a001-aa60dde0d0f1" processor="http:request">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="0bb881cc-641a-4a14-9f5f-f0c26a78cab0" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value='#[%dw 2.0 output application/json &#10;&#10;---&#10;{&#10;    "Name": "bharatchim17",&#10;    "Job": "developer",&#10;    "id": "208",&#10;    "createdAt": "2024-03-29T08:49:12.494Z"&#10;}]' mediaType="application/json" encoding="UTF-8" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Event" doc:id="fde748b0-0e05-4f49-8379-f29520ac1065" >
+			</munit:set-event>
+			<flow-ref doc:name="Flow-ref to invoke-munit-poc-002Flow" doc:id="710b2759-a4ba-4481-a689-3667dfa57469" name="invoke-munit-poc-002Flow" />
+		</munit:execution>
+		<munit:validation >
+			<logger level="INFO" doc:name="Logger" doc:id="3762c47e-d71c-4622-a67e-cc2b565a1e8f" message="#[payload]"/>
+			<!-- [STUDIO:"Verify HTTP call"]<munit-tools:verify-call doc:name="Verify HTTP call" doc:id="04fab02f-2d6d-4f77-b85f-a40ec490beb9" processor="http:request" atLeast="1">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="0bb881cc-641a-4a14-9f5f-f0c26a78cab0" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call> [STUDIO] -->
+			<munit-tools:assert doc:name="Assert expression" doc:id="d4a6bd24-60c8-4a89-a4c6-6b07eff7e807" >
+			</munit-tools:assert>
+		</munit:validation>
+	</munit:test>
+
+
+</mule>

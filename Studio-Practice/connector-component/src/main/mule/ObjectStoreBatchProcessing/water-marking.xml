@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:os="http://www.mulesoft.org/schema/mule/os"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	<!-- [STUDIO:"water-markingFlow"]<flow name="water-markingFlow" doc:id="b781cf50-6b1f-48bd-8c1d-d99d2e83bdc4" >
+		
+		 <db:listener doc:name="waterMarkingFlow-OnTableRow" doc:id="3737e9da-dad0-4996-adad-f7f1f9bc93f0" config-ref="MySQL_Database_Config" table="world.city">
+			<scheduling-strategy >
+				<fixed-frequency frequency="2" timeUnit="MINUTES"/>
+			</scheduling-strategy>
+		</db:listener>
+		<logger level="INFO" doc:name="Logg the Paylaod" doc:id="40cf5f89-18c2-4f96-8556-307cfc9a9157" message="#[payload&#93;"/>
+		<ee:transform doc:name="Transform Message" doc:id="c9378250-6eff-417f-aac6-9d381243e640" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+&#45;&#45;-
+payload&#93;&#93;></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Transformed - Log the payload" doc:id="40132ce0-62c9-40ed-82c2-015ac04fc07d" message="#[payload&#93;"/>
+	</flow> [STUDIO] -->
+	
+	<!-- [STUDIO:"waterMarkingFlow-Manual"]<flow name="waterMarkingFlow-Manual" doc:id="f6a16235-b479-49f0-8398-4861ba440846" >
+		<scheduler doc:name="Scheduler Runs every 10 seconds" doc:id="e9a824fa-e88e-46f0-a70a-844cce9f2923" >
+			<scheduling-strategy >
+				<fixed-frequency frequency="5" timeUnit="SECONDS"/>
+			</scheduling-strategy>
+		</scheduler>
+		<http:listener doc:name="Listener" doc:id="07f1e24c-6064-4160-89bc-3c05e31d1c25" config-ref="HTTP_Listener_config" path="/water"/>
+		<os:retrieve doc:name="Retrieve wMOracleDBEmpInfo" doc:id="76523331-7bc8-4e88-af97-d0f52ebdc8b6" key="wMOracleDBEmpInfo" objectStore="Persistance-Module01-Object_store" target="outputwMOracleDBEmpInfo">
+			<os:default-value ><![CDATA[0&#93;&#93;></os:default-value>
+		</os:retrieve>
+		<db:select doc:name="Select Employee Information" doc:id="93cd4f7e-ef56-44e6-9494-cc4df7a2152f" config-ref="MySQL_Database_Config">
+			<db:sql ><![CDATA[select * from world.city
+where ID  > :ID ;&#93;&#93;></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+	ID: vars.outputwMOracleDBEmpInfo
+}&#93;&#93;&#93;></db:input-parameters>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="c07cf737-a255-4852-a151-aab2feeb99b2" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+&#45;&#45;-
+payload&#93;&#93;></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Print the payload" doc:id="a47b137e-5800-4489-acb6-8f0c916dc6c5" message="#['\n'&#93; #['\n'&#93; - #[payload&#93;"/>
+		<os:store doc:name="Store - wMOracleDBEmpInfo" doc:id="6a9e6abf-1d91-427e-89c1-de09dda9963e" key="wMOracleDBEmpInfo" objectStore="Persistance-Module01-Object_store" failOnNullValue="false">
+			<os:value ><![CDATA[#[%dw 2.0
+output application/json
+&#45;&#45;-
+max(payload map $.ID)&#93;&#93;&#93;></os:value>
+		</os:store>
+		<ee:transform doc:name="Transform Message" doc:id="8cd6183d-3ac9-48c7-82e3-69d770639ce7" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+&#45;&#45;-
+payload&#93;&#93;></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<error-handler />
+	
+</flow> [STUDIO] -->
+</mule>

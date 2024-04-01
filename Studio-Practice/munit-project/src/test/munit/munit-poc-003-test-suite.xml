@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:munit="http://www.mulesoft.org/schema/mule/munit"
+	xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	<munit:config name="munit-poc-003-test-suite.xml">
+		<munit:parameterizations >
+			<munit:parameterization name="paramID2" >
+				<munit:parameters >
+					<munit:parameter propertyName="userID" value="2" />
+					<munit:parameter propertyName="reqResPayload" value='#[ %dw 2.0 output application/json --- readUrl("classpath://munitPOC3/reqResPayloadID2.json")]' />
+				</munit:parameters>
+			</munit:parameterization>
+			<munit:parameterization name="paramID3" >
+				<munit:parameters >
+					<munit:parameter propertyName="userID3" value="3" />
+					<munit:parameter propertyName="reqResPayload" value='#[ %dw 2.0 output application/json --- readUrl("classpath://munitPOC3/reqResPayloadID3.json")]' />
+				</munit:parameters>
+			</munit:parameterization>
+			<munit:parameterization name="paramID4" >
+				<munit:parameters >
+					<munit:parameter propertyName="userID4" value="4" />
+					<munit:parameter propertyName="reqResPayload" value='#[ %dw 2.0 output application/json --- readUrl("classpath://munitPOC3/reqResPayloadID4.json")]' />
+				</munit:parameters>
+			</munit:parameterization>
+		</munit:parameterizations>
+	
+	
+
+		
+		
+	
+</munit:config>
+	<munit:test name="munit-poc-003-ParameterTesting" doc:id="7b69f85a-7280-4392-9a5a-e6f9c04f2ad1" description="Test">
+		<munit:behavior>
+			<munit-tools:mock-when doc:name="Mock ReqRes" doc:id="19e7a93d-a236-4507-b2ab-1278c6a0f622" processor="http:request">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="ec3aab62-c804-4d1e-b497-47808d2e3e29" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="${reqResPayload}" mediaType="application/json" encoding="UTF-8" />
+				</munit-tools:then-return>
+			
+</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to ParameterTest Suite" doc:id="dd9034c7-7f09-49e2-b283-343c1fb1ef60" name="munit-poc-003Flow"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert doc:name="Assert expression" doc:id="ce0de730-ec90-420e-937e-3dfbada0b16a" />
+		</munit:validation>
+	</munit:test>
+	
+	<munit:test name="munit-poc-003-test-suite-munit-poc-003FlowTest" doc:id="653a97bc-5e48-441e-9230-6cce4cc6c064" description="Test">
+		<munit:enable-flow-sources >
+			<munit:enable-flow-source value="munit-poc-003Flow"/>
+		</munit:enable-flow-sources>
+		<munit:behavior >
+			<munit:set-event doc:name="Set Event" doc:id="c6ac8d68-0782-41d1-82c8-23337960713a">
+				<munit:variables>
+					<munit:variable key="setUserID" value="2" />
+				</munit:variables>
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<http:request method="GET" doc:name="Request Localhost" doc:id="bc372ad6-a438-44de-a414-7caf439599ed" config-ref="localHost_Munit_Configurations" path="/munit003/{userID}" responseTimeout="600000">
+				<http:uri-params><![CDATA[#[{
+	userID: vars.setUserID
+}]]]></http:uri-params>
+			</http:request>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert doc:name="Assert expression" doc:id="50ecee67-09a4-42f1-82da-01d6c4e202bd" />
+		</munit:validation>
+	</munit:test>
+
+
+</mule>

@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	<error-handler name="handleHTTPErrors" doc:id="d1f4e44f-7817-4103-8bda-4d0fb5b668b4" >
+		<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="5e3146a8-f092-4e87-a9c4-77db01e52959" type="HTTP:BAD_GATEWAY">
+			<logger level="INFO" doc:name="HTTP  - BAD_GATEWAY" doc:id="9c0e5561-3b66-4793-bbbe-e164b8fb690f" message="Error Type is HTTP:BAD_GATEWAY"/>
+			<ee:transform doc:name="Transform Message" doc:id="d0131390-32fe-49ac-88c0-fb6da1569e36">
+				<ee:message>
+					<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	errorType :  error.errorType,
+	status : "Failure"
+}]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+		
+</on-error-continue>
+		<on-error-continue enableNotifications="true" logException="true" doc:name="HTTP:BAD_REQUEST, HTTP:CLIENT_SECURITY" doc:id="2a15f0cf-49a1-465d-a5eb-9a1283bab39e" type="HTTP:BAD_REQUEST, HTTP:CLIENT_SECURITY" >
+			<logger level="INFO" doc:name="HTTP:BAD_REQUEST, HTTP:CLIENT_SECURITY" doc:id="2d37e3ec-d4ba-4abf-b803-7ace848f3d39" message="Error Type is HTTP:BAD_GATEWAY" />
+			<ee:transform doc:name="Transform Message" doc:id="7efd3024-22cf-4fe7-9018-dc4d187abad1" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	errorType :  error.errorType,
+	status : "Failure"
+}]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+		
+</on-error-continue>
+		
+		<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="3e4a01d6-116f-44ca-838d-fbfef1560305" type="STREAM_MAXIMUM_SIZE_EXCEEDED">
+			<logger level="INFO" doc:name="STREAM_MAXIMUM_SIZE_EXCEEDED" doc:id="b96f8ff5-4c37-4b4a-829e-8216582f947e" message="Error Type is STREAM_MAXIMUM_SIZE_EXCEEDED" />
+			<ee:transform doc:name="Transform Message" doc:id="adc1313c-1057-428e-ac35-8a5d492d9a23">
+				<ee:message>
+					<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	errorType :  error.errorType,
+	status : "Failure"
+}]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+		</on-error-continue>
+		<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="88b5c8f3-b831-427b-b215-a5a718f58db1" type="HTTP:CONNECTIVITY">
+			<logger level="INFO" doc:name="Logger" doc:id="22d47cc5-7f69-4a66-8559-647e8d0d1d64" message="⏰⏰⏰⏰⏰⏰⏰⏰⏰⏰⏰⏰⏰⏰⏰" />
+			<ee:transform doc:name="Transform Message" doc:id="97ff721a-dc96-405e-931f-49e7b7668c34">
+				<ee:message>
+					<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	errorType :  error.errorType,
+	status : "Failure"
+}]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+		</on-error-continue>
+		<!-- [STUDIO:"On Error Propagate"]<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="98cf3327-3731-4e27-8bde-da4a4979ccc3" type="HTTP:CONNECTIVITY">
+			<logger level="INFO" doc:name="Logger" doc:id="7465586f-fc33-4e02-816d-891bb98690f0" message="⏰⏰⏰⏰⏰⏰⏰⏰⏰⏰⏰⏰⏰⏰⏰" />
+			<ee:transform doc:name="Transform Message" doc:id="0e5b0984-0a10-4bf7-ba5d-126968c21bf3" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+&#45;&#45;-
+{
+	errorType :  error.errorType,
+	status : "Failure"
+}&#93;&#93;></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+		</on-error-propagate> [STUDIO] -->
+</error-handler>
+	
+	
+	
+	
+	</mule>

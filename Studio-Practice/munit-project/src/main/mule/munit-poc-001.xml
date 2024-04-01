@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="munit-poc-001" doc:id="be72e65d-674e-48c8-bc61-0ade087abba2" >
+		<http:listener doc:name="Listener" doc:id="c0748507-4790-4dd2-a027-114ba18c927c" path="/munit001" config-ref="HTTP_Listener_config"/>
+		<ee:transform doc:name="Transform Message" doc:id="b96b8305-048f-4b2d-a165-bb6dd886ad30" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="queryParam1" ><![CDATA[attributes.queryParams.param1]]></ee:set-variable>
+				<ee:set-variable variableName="queryParam2" ><![CDATA[attributes.queryParams.param2]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<ee:transform doc:name="Transform Message" doc:id="1b7ae99c-a956-492c-bd24-5172889880f9" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"AddValue": vars.queryParam1 as Number
+	+ vars.queryParam2 as Number
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="6a65e558-87d2-4b14-b4fc-70aaf0d7bf9a" message="#[payload] ❤❤❤❤❤❤❤❤❤"/>
+	</flow>
+</mule>

@@ -1,0 +1,6 @@
+httpListener:
+  port: "6062"
+  host: "localhost"
+  basePath: "/production" 
+  readTimeout: "3000"
+          

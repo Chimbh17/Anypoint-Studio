@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="munit-poc-003Flow" doc:id="bd12f0d1-4782-4dd4-9a89-4b44e7b75aad" >
+		<http:listener doc:name="Listener" doc:id="9ab71be1-09bd-4dba-9eee-928dce003a61" config-ref="HTTP_Listener_config" path="/munit003/{userID}"/>
+		<ee:transform doc:name="Extract QuerParameters" doc:id="37b0b63c-30b5-4ffc-bae8-b46f1288e1a0" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="extractUserID" ><![CDATA[attributes.uriParams.userID]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<http:request method="GET" doc:name="Request" doc:id="ec3aab62-c804-4d1e-b497-47808d2e3e29" config-ref="HTTP_Request_configuration" path="/users/{userID}">
+			<http:uri-params ><![CDATA[#[output application/java
+---
+{
+	"userID" : vars.extractUserID
+}]]]></http:uri-params>
+		</http:request>
+		<choice doc:name="Choice" doc:id="c14b1492-431a-4871-9069-ea3ee1d2c277" >
+			<when expression="#[payload.data.id == 2]">
+				<ee:transform doc:name="Transform Message" doc:id="412af932-c60d-4b88-9e9b-a05107ec97ee" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</when>
+			<when expression="#[payload.data.id == 3]">
+				<ee:transform doc:name="Transform Message" doc:id="7988a47c-dd88-4eae-98af-aff09e4a193e">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</when>
+			<when expression='payload.data.id == ""'>
+				<ee:transform doc:name="Transform Message" doc:id="c91b5115-d4a3-404b-a877-ffdf0071087a">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"Message": "Payload is Empty.." 
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</when>
+			<otherwise>
+				<ee:transform doc:name="Transform Message" doc:id="fd15ad34-7710-46c1-82a1-eb92aa52b0b4" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</otherwise>
+		</choice>
+		<logger level="INFO" doc:name="Logger" doc:id="92e4bd30-1495-4483-820f-106bd85ea864" message="#['\n'] #['\n']    #[payload]    🎯🎯🎯🎯🎯🎯🎯🎯🎯🎯🎯🎯🎯🎯🎯🎯🎯🎯🎯🎯🎯🎯🎯🎯🎯🎯"/>
+	</flow>
+</mule>

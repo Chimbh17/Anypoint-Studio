@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="f7b610d3-0684-4963-8e1f-44354fb81e2c" basePath="/api" >
+		<http:request-connection host="reqres.in" />
+	</http:request-config>
+	<http:request-config name="localHost_Munit_Configurations" doc:name="HTTP Request configuration" doc:id="befcc43c-b05b-42b9-8c36-6ef0285bc334" basePath="/learnmulsoft" >
+		<http:request-connection host="localhost" port="6061" />
+	</http:request-config>
+</mule>

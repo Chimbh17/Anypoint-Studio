@@ -1,20 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+
 <mule xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:secure-properties="http://www.mulesoft.org/schema/mule/secure-properties"
 	xmlns="http://www.mulesoft.org/schema/mule/core"
 	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/secure-properties http://www.mulesoft.org/schema/mule/secure-properties/current/mule-secure-properties.xsd
 http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd">
-<db:config name="Oracle_Database_Config" doc:name="Database Config" doc:id="e2d98fa4-d58c-4e60-9054-95499d3ff11e" >
+
+
+	<db:config name="Oracle_Database_Config" doc:name="Database Config" doc:id="a51d753c-23e2-4113-a6a1-2db4a3e644f6" >
 		<db:oracle-connection host="${secure::OracleDatabase.host}" user="${secure::OracleDatabase.user}" password="${secure::OracleDatabase.password}" port="${secure::OracleDatabase.port}"/>
 	</db:config>
-	<db:config name="MySQL_Database_Config" doc:name="Database Config" doc:id="36a82340-ca14-42c6-9abf-6fb3e608ab8c" >
+	<db:config name="MySQL_Database_Config" doc:name="Database Config" doc:id="a4a83559-16b0-47ba-8827-b720f4e7bbb9" >
 		<db:my-sql-connection host="${secure::MySQLDatabase.host}" port="${secure::MySQLDatabase.port}" user="${secure::MySQLDatabase.user}" password="${secure::MySQLDatabase.password}" />
 	</db:config>
-	<secure-properties:config name="Secure_Properties_Config" doc:name="Secure Properties Config" doc:id="2aa4f929-cc60-4e7c-abcf-25c4a350524a" file="databaseCofiguration/${env}-database-config.yaml" key="${enc.key}" >
+	<secure-properties:config name="Secure_Properties_Config" doc:name="Secure Properties Config" doc:id="a5e2ca99-fe60-4c83-9177-9b9278a80e01" file="databaseCofiguration/${env}-database-config.yaml" key="${enc.key}" >
 		<secure-properties:encrypt algorithm="Blowfish" />
 	</secure-properties:config>
-	
+
+
 	
 	
 </mule>

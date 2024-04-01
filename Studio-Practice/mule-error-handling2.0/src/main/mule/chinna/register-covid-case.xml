@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit"
+	xmlns:json="http://www.mulesoft.org/schema/mule/json"
+	xmlns:xml-module="http://www.mulesoft.org/schema/mule/xml-module" xmlns:validation="http://www.mulesoft.org/schema/mule/validation"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd
+http://www.mulesoft.org/schema/mule/xml-module http://www.mulesoft.org/schema/mule/xml-module/current/mule-xml-module.xsd
+http://www.mulesoft.org/schema/mule/json http://www.mulesoft.org/schema/mule/json/current/mule-json.xsd
+http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd">
+	<!-- [STUDIO:"post:\cases:application\json:uhub-sapi-config"]<flow name="post:\cases:application\json:uhub-sapi-config" doc:id="cc1bff18-2913-4664-bb1b-ec7c80a301db">
+		<http:listener doc:name="Listener" doc:id="d71c214c-e29a-4cb0-b3cb-ec667f1e1815" config-ref="HTTP_Listener_configurations" path="v1/cases" allowedMethods="POST">
+			<http:response statusCode="#[vars.statusCode&#93;">
+			</http:response>
+			<http:error-response statusCode="#[vars.statusCode&#93;">
+				<http:body><![CDATA[#[payload&#93;&#93;&#93;></http:body>
+			</http:error-response>
+		</http:listener>
+		<ee:transform doc:name="Set correlationId And transactionId" doc:id="ab77d2e9-6046-432a-97fb-f26e10fef885">
+			<ee:message />
+			<ee:variables>
+				<ee:set-variable variableName="correlationId"><![CDATA[attributes.headers.'x-correlation-id' default ""&#93;&#93;></ee:set-variable>
+				<ee:set-variable variableName="transactionId"><![CDATA[attributes.headers.'x-transaction-id' default uuid()&#93;&#93;></ee:set-variable>
+				<ee:set-variable variableName="inputPayload" ><![CDATA[payload&#93;&#93;></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<logger level="INFO" doc:name="Start Log" doc:id="69899a32-b881-4477-bf65-b85112f1e069" message='transactionID: #[vars.transactionId&#93;&#93;, correlationID: #[vars.correlationId&#93;, message: "Started update covid case flow", payload: #[payload&#93;' />
+		<json:validate-schema doc:name="Validate Covide JSON Payload Schema" doc:id="e4fc99be-4df2-4122-91c0-134835e84d3d" schema="schemas/covid-case-json-schema.json" />
+		<db:stored-procedure doc:name="Insert Covid Case Stored procedure" doc:id="abe24443-6ed8-4536-b9b2-3170a1ea56b3" config-ref="Uhub_Database_Config">
+			<db:sql><![CDATA[{call insert_covid_master(:source, :case_type, :first_name, :last_name, :phone, :email, :date_of_birth, :national_id, :national_id_type, :street_address, :city, :state, :postal, :country, :create_date, :update_date, :create_by, :update_by, :case_id)}&#93;&#93;></db:sql>
+			<db:input-parameters><![CDATA[#[%dw 2.0
+output application/java
+var currentDate = now() as String { format: "YYYY-MM-dd" }
+var owner = "UHIS"
+&#45;&#45;-
+{
+	source: vars.inputPayload.source,
+	case_type: vars.inputPayload.caseType,
+	first_name: vars.inputPayload.firstName,
+	last_name: vars.inputPayload.lastName,
+	phone: vars.inputPayload.phone,
+	email: vars.inputPayload.email,
+	date_of_birth: vars.inputPayload.dateOfBirth as String { format: "YYYY-MM-dd" },
+	national_id: vars.inputPayload.nationalID,
+	national_id_type: vars.inputPayload.nationalIDType,
+	street_address: vars.inputPayload.address.streetAddress,
+	city: vars.inputPayload.address.city,
+	state: upper(vars.inputPayload.address.state),
+	postal: vars.inputPayload.address.postal,
+	country: vars.inputPayload.address.country,
+	create_date: currentDate,
+	update_date: currentDate,
+	create_by: owner,
+	update_by: owner
+}&#93;&#93;&#93;></db:input-parameters>
+			<db:output-parameters>
+				<db:output-parameter key="case_id" type="INTEGER" />
+			</db:output-parameters>
+		</db:stored-procedure>
+		<ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd" doc:name="Prepare Response">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+&#45;&#45;-
+{
+  caseID: payload.case_id as String
+}&#93;&#93;></ee:set-payload>
+            </ee:message>
+			<ee:variables>
+				<ee:set-variable variableName="statusCode"><![CDATA[201&#93;&#93;></ee:set-variable>
+			</ee:variables>
+        </ee:transform>
+		<logger level="INFO" doc:name="End Log" doc:id="7f1697f0-0658-40a4-b583-d9f94cda0a85" message='transactionID: #[vars.transactionId&#93;&#93;, correlationID: #[vars.correlationId&#93;, message: Completed register covid case flow, payload: #[payload&#93;"' />
+		<error-handler>
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="f3628b62-df20-4857-92d2-50abc18cf49d" type="JSON:SCHEMA_NOT_HONOURED">
+				<ee:transform doc:name="Set Bad Request Response" doc:id="42a36419-63f5-412d-811d-875f843196e8">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+&#45;&#45;-
+{
+   "code":400,
+   "message":"Bad request",
+   "description":error.errorMessage.payload.message[0&#93; as String,
+   "dateTime":now() as String { format: "yyyy-MM-dd'T'HH:mm:ss'Z'" },
+   "transactionId":vars.transactionId
+}
+&#93;&#93;></ee:set-payload>
+					</ee:message>
+					<ee:variables>
+						<ee:set-variable variableName="statusCode"><![CDATA[400&#93;&#93;></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+			</on-error-continue>
+		</error-handler>
+    
+</flow> [STUDIO] -->
+	<!-- <flow name="register-covid-caseFlow" doc:id="6fec4623-7652-4731-b216-61e9c420c452" >
+		<logger level="INFO" doc:name="Logger" doc:id="8c52ce8f-ea52-4566-a33e-d986292fc060" />
+		<db:select doc:name="Select CASE_ID" doc:id="23ec22c5-a862-46e6-b2b7-74e85d9344ff" config-ref="Uhub_Database_Config">
+			<db:sql><![CDATA[select max(case_id) as case_id from CVD_CASE_MASTER where email = :email]]></db:sql>
+			<db:input-parameters><![CDATA[#[{
+	email: vars.covidPayload.email
+	}]]]></db:input-parameters>
+		</db:select>
+		<db:insert doc:name="Insert Covid Case Master" doc:id="72efd95f-9b8f-4fc0-9c6c-3d6c5beb3ea7" config-ref="Uhub_Database_Config" queryTimeout="60000" queryTimeoutUnit="MILLISECONDS" autoGenerateKeys="true">
+			<reconnect />
+			<db:sql><![CDATA[insert into cvd_case_master(source, case_type, first_name, last_name, phone, email, date_of_birth, national_id, national_id_type, street_address, city, state, postal, country, create_date, update_date, create_by, update_by) values(:source, :case_type, :first_name, :last_name, :phone, :email, TO_DATE(:date_of_birth, 'YYYY-MM-DD'), :national_id, :national_id_type, :street_address, :city, :state, :postal, :country, TO_DATE(:create_date, 'YYYY-MM-DD'), TO_DATE(:update_date, 'YYYY-MM-DD'), :create_by, :update_by)]]></db:sql>
+			<db:input-parameters><![CDATA[#[vars.covidPayload]]]></db:input-parameters>
+			<db:auto-generated-keys-column-names>
+				<db:auto-generated-keys-column-name value="CASE_ID" />
+			</db:auto-generated-keys-column-names>
+		</db:insert>
+	</flow> -->
+	</mule>

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:munit="http://www.mulesoft.org/schema/mule/munit"
+	xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	<munit:config name="munit-poc-001-test-suite.xml" />
+	<munit:test name="munit-poc-001-QueryParams" doc:id="4fa98b1e-d66f-46c6-aa21-22afbaf43452" description="Execution of QueryParameters-Add 2 numbers">
+		<munit:execution >
+			<munit:set-event doc:name="Set Mule Event" doc:id="7ca102b9-dd66-4c5f-93dc-ffec3936dfb9" >
+				<munit:attributes value='#[{&#10;	queryParams:{param1: "20" , param2: "30"} &#10;}]' />
+			</munit:set-event>
+			<flow-ref doc:name="Flow-ref to munit-poc-001" doc:id="36b9535f-5eff-46a4-b39c-3c28961bf19d" name="munit-poc-001"/>
+		</munit:execution>
+		<munit:validation >
+			<logger level="INFO" doc:name="Logger" doc:id="b7e4e556-0da8-4ab3-99d3-4ab95d1ee7ce" message="#[payload]"/>
+			<munit-tools:assert-equals doc:name="Assert equals 50" doc:id="3023a841-6517-4f68-8ea6-63774b17316d" actual="#[payload.AddValue]" expected="#[50 as Number]" message="🎈🎈🎈🎈🎈🎈🎈🎈🎈"/>
+			<munit-tools:assert-that doc:name="Assert that" doc:id="a6915f66-d5ff-4b81-9db5-5a8c64cdf003" is="#[MunitTools::withMediaType('application/json')]" expression="#[payload]"/>
+			<munit-tools:assert doc:name="Assert expression" doc:id="6c7899bc-a9b5-473f-beb2-16b926c9936b" >
+				<munit-tools:that ><![CDATA[#[import * from dw::test::Asserts 
+ ---
+ payload.AddValue must beNumber()]]]></munit-tools:that>
+			</munit-tools:assert>
+			<logger level="INFO" doc:name="Logger" doc:id="b6103a38-15d5-4429-a447-cd80cad32354" message="#[payload]🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉🎉"/>
+		</munit:validation>
+	</munit:test>
+
+
+</mule>

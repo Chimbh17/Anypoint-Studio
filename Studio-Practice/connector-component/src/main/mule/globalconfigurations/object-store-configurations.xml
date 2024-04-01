@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:os="http://www.mulesoft.org/schema/mule/os" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd">
+	<os:object-store name="Persistance-Module01-Object_store" doc:name="Object store" doc:id="c2e6b030-9a51-48b2-ab6d-bd75e520fd31" />
+	<os:object-store name="Non-Persistance-Module01-Object_store" doc:name="Object store" doc:id="0c07f653-5d1a-45b1-bb74-378f5f2c285a" persistent="false" />
+</mule>

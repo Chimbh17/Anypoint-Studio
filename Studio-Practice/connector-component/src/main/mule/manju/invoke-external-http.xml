@@ -61,22 +61,22 @@ payload.data]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
 	</flow>
-	<flow name="invoke-ipinfo-httpFlow" doc:id="2de119d0-0dee-4819-b56c-85a43e89bee4" >
+	<!-- [STUDIO:"invoke-ipinfo-httpFlow"]<flow name="invoke-ipinfo-httpFlow" doc:id="2de119d0-0dee-4819-b56c-85a43e89bee4" >
 		<http:listener doc:name="Listener" doc:id="243a2bc4-8c59-415f-bf1f-8383df38b083" config-ref="HTTP_Listener_config" path="/invokeipinfo/{passAdreess}/{name}"/>
 		<http:request method="GET" doc:name="Invoke Ip Information" doc:id="bcf3cf34-c66a-4673-a58d-3da69e0fc064" config-ref="HTTP_IP_Invoke_configuration" path="/{value1}/{value2}">
-			<http:body ><![CDATA[#[""]]]></http:body>
+			<http:body ><![CDATA[#[""&#93;&#93;&#93;></http:body>
 			<http:uri-params ><![CDATA[#[{
 	value1 :  attributes.uriParams.passAdreess,
 	value2 : attributes.uriParams.name
-}]]]></http:uri-params>
+}&#93;&#93;&#93;></http:uri-params>
 		</http:request>
 		<ee:transform doc:name="Transform Message" doc:id="744ad3dc-d7b4-4bed-aab7-ef71918b86d3" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
 output application/json
----
-payload]]></ee:set-payload>
+&#45;&#45;-
+payload&#93;&#93;></ee:set-payload>
 			</ee:message>
 		</ee:transform>
-	</flow>
+	</flow> [STUDIO] -->
 </mule>

@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:java="http://www.mulesoft.org/schema/mule/java"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/java http://www.mulesoft.org/schema/mule/java/current/mule-java.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="javaModuleFlow-Static" doc:id="3dce930e-b70b-44bf-b4e4-f3e4d614b392" >
+		<http:listener doc:id="d89d0da0-65f9-48c9-93a1-c280938b0a17" doc:name="Listner" config-ref="HTTP_Listener_config" path="/javaodule"/>
+		<java:invoke-static doc:name="Invoke static-Welcome mule" doc:id="b90872be-813b-4efe-bce5-d9da22a71aa0" class="codeinJava.codeJava" method="welcomeMule()" target="saveModule1"/>
+		<java:invoke-static doc:name="Invoke static-Concatenate" doc:id="580d0e0f-aacc-48fe-843a-50fd600c2f30" class="codeinJava.codeJava" method="studentName(java.lang.String,java.lang.String)" target="ConcatenateValue">
+			<java:args ><![CDATA[#[{
+	firstName: "Manahor",
+	lastName: "Ganfu"
+}]]]></java:args>
+		</java:invoke-static>
+		<ee:transform doc:name="Invoke Java via Transformer" doc:id="7a8d676d-3163-4ef1-a5e8-f5954160f498">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+import java!codeinJava::codeJava
+---
+{
+	"key1": vars.saveModule1 ,
+	"key2": vars.ConcatenateValue,
+	"Key3": codeJava::studentId(100 as Number)
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="500fe8e7-7335-4171-a1ad-d29adf31f6bf" message="Log has been Ended 💋💋💋💋💋💋💋💋💋💋💋💋💋"/>
+	
+</flow>
+	<flow name="javaModuleFlow-NonStatic" doc:id="8c5b0e3d-d3f9-4228-9949-73956aebf913" >
+		<http:listener doc:id="fa65d213-9cc6-4cf5-b1cd-88205b44231f" doc:name="Create A New Instance - GreetStudents, No Arguments" config-ref="HTTP_Listener_config" path="/newinst"/>
+		<java:new doc:name="New Instance Without Argument" doc:id="3acb38fc-94ca-4c71-956f-8422ae38b889" class="codeinJava.GreetStudents" constructor="GreetStudents()" target="NoArgument"/>
+		<java:invoke doc:name="Invoke-concatenatStudentName" doc:id="de0c458f-6ab8-4575-9fbb-9c5223e55770" instance="#[vars.NoArgument]" class="codeinJava.GreetStudents" method="concatenatStudentName(java.lang.String,java.lang.String)">
+			<java:args ><![CDATA[#[{
+	fName: "Mule" ,
+	lName: "Soft"
+}]]]></java:args>
+		</java:invoke>
+		<logger level="INFO" doc:name="Log the Payload" doc:id="49b54ec3-2992-4275-b89d-cb6eb32784a3" message="#[payload]" />
+		<logger level="INFO" doc:name="Logger" doc:id="c2573869-35df-4e72-8b3d-aa19b2375965" message="😘😘😘😘😍😍😍😍" />
+		<java:invoke doc:name="Invoke-GreetStudentName" doc:id="49ab0079-c875-4ce2-ab10-3fa0bdbc22bf" instance="#[vars.NoArgument]" class="codeinJava.GreetStudents" method="GreetStudentName()"/>
+		<logger level="INFO" doc:name="Logger" doc:id="e90fbcc2-aa61-4fbd-ae9b-ff390066cb94" message="💋💋💋❤❤❤💋💋💋" />
+		<logger level="INFO" doc:name="Log the Payload" doc:id="003a2f27-bf34-4d55-a95f-88aba15353e9" message="#[payload]" />
+	</flow>
+	<flow name="javaModuleFlow-NewValidate" doc:id="e2131846-ff94-4e85-8203-865ce86f6bb9" >
+		<http:listener doc:name="Listener for NewValidate" doc:id="b082cc58-6017-4d27-8d3b-8bed6726de23" config-ref="HTTP_Listener_config" path="/NewValidate"/>
+		<java:new doc:name="New" doc:id="30701686-02d8-46b0-ac09-75e5833d6f5d" class="codeinJava.subStudent" target="validateInstance" constructor="subStudent()"/>
+		<java:validate-type doc:name="Validate type" doc:id="6ff2cba3-e82a-4dc9-a936-a9e0da9b39d7" class="codeinJava.Student" instance="#[vars.validateInstance]"/>
+		<ee:transform doc:name="Transform Message" doc:id="72e4e0eb-d755-4c80-b5cf-c28cfb563a57" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+
+
+---
+{
+	
+	"Key2": correlationId 
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>

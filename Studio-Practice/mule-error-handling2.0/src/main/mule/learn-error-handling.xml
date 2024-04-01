@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="error-on-error-continue" doc:id="ac7fb9a7-e243-4eb3-b877-69924e4faee2" >
+		<http:listener doc:name="Listener" doc:id="ba4bd71c-d9bf-4ebb-86ad-a5cdd46fa453" config-ref="HTTP_Listener_configurations" path="/errorContinue"/>
+		<logger level="INFO" doc:name="Logger" doc:id="81290e48-c815-420d-b13d-f590df0a3d65" message="#[payload]"/>
+		
+		<flow-ref doc:name="Invoke Perform Div Operations" doc:id="ce96df92-335f-4bcf-842c-8a77e117592a" name="performDivOperatons-subFlow"/>
+		<logger level="INFO" doc:name="Logger" doc:id="5f7704bb-4c06-4034-a7a0-3c5fc55efd90" message="*************************************************************************************"/>
+		<error-handler >
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="4d06dd85-d090-459e-8aec-786dae49d918" >
+				<logger level="INFO" doc:name="Logger" doc:id="0cf4dd29-7b61-48d3-8bff-dacd5cbf9099" message="#[error.description]"/>
+				<logger level="INFO" doc:name="Abstract-Logger" doc:id="fb9c0900-8946-424c-8871-33aebd6a5aff" message="#['\'n']  #['\'n']  #['\'n']  🔞🔞🔞🔞🔞🔞🔞🔞🔞🔞🔞🔞"/>
+				<ee:transform doc:name="Send Respose back" doc:id="7591b451-ddf0-4655-ad28-9adde34120a8">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	ErrorDetails: error.errorType ,
+	ErrorDescription: error.description ,
+	TypeOferror: "On error Continue"
+}
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+			</on-error-continue>
+		</error-handler>
+	</flow>
+
+   
+   <!-- [STUDIO:"perform-div-Sub_Flow"]<sub-flow name="perform-div-Sub_Flow" doc:id="fc921fce-1923-4fae-8ee3-3ff8d8f96951" >
+		<try doc:name="Try" doc:id="c2473cbf-6355-4337-86e3-ed9493cfa954" >
+			<ee:transform doc:name="Divide Two Number" doc:id="bbd644bb-d5a0-429e-864e-121219b5ee55">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+&#45;&#45;-
+{
+	key1: (payload.variable1)/(payload.variable2)
+}&#93;&#93;></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+			<error-handler >
+				<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="3f744b1f-1274-4d7d-8910-3a342decac19" >
+					<logger level="INFO" doc:name="Payload" doc:id="504517dc-7b4d-4a77-8afe-1c375aa11116" message="#[payload&#93;" />
+				</on-error-propagate>
+			</error-handler>
+		</try>
+		<ee:transform doc:name="Send Respose back" doc:id="2b9feefe-396e-4004-a262-ce23f289f646" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+&#45;&#45;-
+{
+	ErrorDetails: error.errorType ,
+	ErrorDescription: error.description ,
+	TypeOferror: "On error Continue"
+}
+&#93;&#93;></ee:set-payload>
+			</ee:message>
+		</ee:transform>     
+</sub-flow> [STUDIO] -->
+	<flow name= "error-Flow-On-error-propogate" doc:id="e0625c89-d651-43b7-ac14-bd8e507ec632" >
+		<http:listener doc:name="Listener" doc:id="b1bc2124-0a37-428b-9bbf-6fe1a227b914" config-ref="HTTP_Listener_configurations" path="/errorPropagate"/>
+		<logger level="INFO" doc:name="Logger" doc:id="485ee5b4-0973-493f-8619-112a2ebe9de0" message="#[payload]"/>
+		<flow-ref doc:name="Flow Reference" doc:id="a76be6cb-74a3-4fdc-b778-6d1b9d62f3ab" name="performDivOperatons-subFlow"/>
+		<logger level="INFO" doc:name="Logger" doc:id="991f22d4-a5d3-4de8-b530-07129482167a" message="*************************************************************************************"/>
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="07e193e0-7701-4046-9989-4a939f9eb653" >
+				<logger level="INFO" doc:name="Logger" doc:id="fac1c3c9-5039-42ea-bced-c438a6bae6d5" message="#[error.description]" />
+				<logger level="INFO" doc:name="Logger" doc:id="ee4811ef-4ec7-4fed-a49f-c9e2876bd67e" message="#['\'n']  #['\'n']  #['\'n']   💥💥💥💥💥💥💥💥 💥💥💥💥💥💥💥💥 💥💥💥💥💥💥💥💥" />
+				<ee:transform doc:name="Send Respose back" doc:id="15917bb4-4a57-416b-be2f-26de1640d26c" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	ErrorDetails: error.errorType ,
+	ErrorDescription: error.description ,
+	TypeOferror: "On error Continue"
+}
+]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</on-error-propagate>
+		
+</error-handler>
+	</flow>
+   
+   
+   <sub-flow name="performDivOperatons-subFlow" doc:id="2dbeb593-e9f4-42b9-9df9-11d5bf5386a4">
+		<try doc:name="Try" doc:id="026ccf3d-465d-4f54-a30f-df7d53912813" >
+			<flow-ref doc:name="Invoke Math Operations except division" doc:id="e9686689-680b-40b3-afcb-50d31170c8c2" name="addMulSubOperations" />
+			<error-handler >
+				<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="94ae8d34-e505-4799-85cd-66b13390576e" >
+					<logger level="INFO" doc:name="Logger" doc:id="77ea4b85-43b5-4d37-87bf-66b9553c66d6" message="#[payload]"/>
+				</on-error-continue>
+			</error-handler>
+		
+</try>
+		<try doc:name="Try" doc:id="117ff5b7-ee21-44a5-8bc4-927243d19314" >
+			<ee:transform doc:name="Divide2Numbers" doc:id="a53798bb-c77d-4d7c-976f-9aabc4f8f775">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	divison: (payload.variable1)/(payload.variable2)
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+			<error-handler >
+				<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="01b2854c-378b-4b7d-b327-7681c746b49b" >
+					<logger level="INFO" doc:name="Logger" doc:id="609057fa-27c7-48e3-b249-6247ad48e14c" message="#[payload]" />
+				</on-error-continue>
+			</error-handler>
+		
+</try>
+		<ee:transform doc:name="sendResponseBack" doc:id="b9fb9147-84e7-42b8-a2c9-5eccac6c6ae2">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	errordetails: error.description,
+	errorType: error.errorType
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</sub-flow>
+	<sub-flow name="addMulSubOperations" doc:id="37016b48-bc33-46fe-9fcb-22662e0edfec" >
+	
+				<ee:transform doc:name="addMulSubOperations" doc:id="fedb770d-c6bc-4243-906f-888775f2d1e4">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	Add: (payload.variable1) + (payload.variable2),
+	Subtraction: (payload.variable1) - (payload.variable2),
+	Multiplication: (payload.variable1) * (payload.variable2)
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+				<ee:transform doc:name="setPayload" doc:id="0864d55d-c5dd-4270-a859-6e575d42af58">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>  </sub-flow>
+
+</mule>

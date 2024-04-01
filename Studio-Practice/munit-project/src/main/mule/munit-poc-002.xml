@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd 
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
+	
+	<configuration doc:name="Configuration" doc:id="5b049ecc-5dea-41e3-be37-d5f4b72465c1" defaultErrorHandler-ref="handleHTTPErrors" />
+	<flow name="invoke-munit-poc-002Flow" doc:id="ce32af67-831f-4fae-9554-3b6b4209857f" >
+		<http:listener doc:name="Listener" doc:id="ec96599d-f3bf-46ff-aedc-4edba2c7f01f" config-ref="HTTP_Listener_config" path="/munit002"/>
+<ee:transform doc:name="Transform Message" doc:id="37175350-c532-49bf-9118-984e2c8d0a43" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+    "Name": attributes.queryParams.name ,
+    "Job":  attributes.queryParams.job
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<until-successful maxRetries="2" doc:name="Until Successful" doc:id="06a886e8-68be-402f-89f2-5517b7116964" millisBetweenRetries="2000">
+			<http:request method="POST" doc:name="Request" doc:id="0bb881cc-641a-4a14-9f5f-f0c26a78cab0" path="/users" config-ref="HTTP_Request_configuration" />
+		</until-successful>
+		<ee:transform doc:name="Transform Message" doc:id="a6d1760f-0184-4675-9eb8-4370127846f8" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	<logger level="INFO" doc:name="Logger" doc:id="ab71ba69-2364-4c29-aeec-060c3825fc00" message="#[payload]  💖💖💖💖💖💖💖💖💖💖💖💖" />
+		
+	</flow>
+	</mule>

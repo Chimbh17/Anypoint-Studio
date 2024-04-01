@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:scripting="http://www.mulesoft.org/schema/mule/scripting"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/scripting http://www.mulesoft.org/schema/mule/scripting/current/mule-scripting.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/scripting-module
+http://www.mulesoft.org/schema/mule/scripting-module/current/mule-scripting-module.xsd">
+	<flow name="Groovy-Flow"
+		doc:id="08e8357a-e727-48f5-8140-b42580df8bbb">
+		<http:listener doc:name="Listener"
+			doc:id="0a7e7b94-3f65-40cb-981f-866b425a650e"
+			config-ref="HTTP_Listener_config" path="/groovy" />
+		<scripting:execute engine="Groovy"
+			doc:name="Execute" doc:id="48731bc5-debd-4a96-9bb6-ac016efaa291">
+			<scripting:code><![CDATA[def list = [11,12,13,14];
+list.add(key1);
+list.add(0,20);
+return list;]]></scripting:code>
+			<scripting:parameters><![CDATA[#[{
+	key1: 100 as Number
+}]]]></scripting:parameters>
+		</scripting:execute>
+		<ee:transform doc:name="Transform Message"
+			doc:id="b4af6eb8-ea5f-4caa-b0ee-dc0897ce149e">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="pythonAndGroovyFlow"
+		doc:id="2307839a-de4e-474d-95ec-13211dc8f98b">
+		<http:listener doc:name="Listener"
+			doc:id="37c2900b-c7df-421b-a42d-aaad3dc99606"
+			config-ref="HTTP_Listener_config" path="/python" />
+		<scripting:execute doc:name="Execute Python"
+			doc:id="8bd826d9-8381-42e3-8c2e-b756a22f60e7" engine="ECMAScript">
+			<scripting:code ><![CDATA[
+
+let a = 100;
+let b = 50;
+let x = a + b;
+console.log(x);]]></scripting:code>
+		</scripting:execute>
+		<ee:transform doc:name="Transform Message"
+			doc:id="0747c1d0-99d7-4f46-8bd7-37924b4e0335">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>
