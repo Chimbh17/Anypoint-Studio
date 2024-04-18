@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:jms="http://www.mulesoft.org/schema/mule/jms" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/current/mule-jms.xsd">
+	<flow name="send-Json-to-Activemq" doc:id="a54449ec-67a7-47b9-9c32-22e2f38e0cd9" >
+		<http:listener doc:name="Listner" doc:id="a34c09a4-b119-499c-bc9d-5c1229cc96a1" config-ref="HTTP_Listener_configurations" path="/sendactivemq"/>
+		<logger level="INFO" doc:name="Logg The Payload" doc:id="e72d4c7b-bf41-4620-b076-76748ad67e32" message="#['\n'] #['\n']   #['\n']  #['\n']"/>
+		<ee:transform doc:name="Transform Message" doc:id="089baee7-0d46-4565-b0b4-c337052a0858" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<jms:publish doc:name="Publish The Message To ActiveMQ" doc:id="94ca378d-8a06-4cc0-b748-38bb8211c8a4" config-ref="JMS_Config" destination="activeMQ_01"/>
+	</flow>
+	<!-- [STUDIO:"Q-Subscriber001"]<flow name="Q-Subscriber001" doc:id="7a75f3aa-c866-4765-b834-41cfa0ffe44f" >
+		<jms:listener doc:name="Sbscribe To AcriveMQ" doc:id="6e801745-445e-4815-8392-32e041c04c21" config-ref="JMS_Config" destination="activeMQ_01" numberOfConsumers="1" ackMode="AUTO" inboundContentType="application/json">
+			<jms:consumer-type >
+				<jms:queue-consumer />
+			</jms:consumer-type>
+		</jms:listener>
+		<logger level="INFO" doc:name="Start Log" doc:id="8b97b6ac-c3ea-435f-a297-7d32b4408960" message="#['\n'&#93; #['\n'&#93;   **********************Q-Subscriber01***************************  #['\n'&#93; #['\n'&#93;" />
+		<ee:transform doc:name="Transform Message" doc:id="ac95beca-cc86-4632-a1ed-af41606a7706" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+&#45;&#45;-
+payload&#93;&#93;></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="End Log" doc:id="3b516647-16af-4217-98ae-f736ea0c9119" message=" #['\n'&#93; #['\n'&#93;  #[payload&#93;      #['\n'&#93; #['\n'&#93;   *************************************************  #['\n'&#93; #['\n'&#93;"/>
+	</flow> [STUDIO] -->
+	<flow name="Q-Subscriber002" doc:id="bf7517ce-4634-45c6-9d71-83bfdc9124af" >
+		<jms:listener doc:name="Sbscribe To AcriveMQ" doc:id="f4342061-416c-45fc-bcde-104e29e221e9" config-ref="JMS_Config" destination="activeMQ_01" ackMode="AUTO" inboundContentType="application/json" numberOfConsumers="1" >
+			<jms:consumer-type >
+				<jms:queue-consumer />
+			</jms:consumer-type>
+		</jms:listener>
+		<logger level="INFO" doc:name="Start Log" doc:id="f69df522-8400-4234-aec3-3b91c1877da1" message="#['\n'] #['\n']   *********************Q-Subscriber02****************************  #['\n'] #['\n']" />
+		<ee:transform doc:name="Transform Message" doc:id="f39099ff-861a-417b-b3dd-e0a32fc82708" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="End Log" doc:id="327b0664-3b3d-4807-a55c-c8fe9f16b12a" message="#['\n'] #['\n']   #[payload]      #['\n'] #['\n']   *************************************************  #['\n'] #['\n']" />
+	</flow>
+</mule>

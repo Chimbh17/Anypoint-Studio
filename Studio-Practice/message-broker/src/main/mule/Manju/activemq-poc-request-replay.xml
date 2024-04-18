@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:jms="http://www.mulesoft.org/schema/mule/jms" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/current/mule-jms.xsd">
+	<flow name="request-reply-producer" doc:id="639919ee-f8a3-4544-806e-27a989a724ea" >
+		<http:listener doc:name="Listener" doc:id="1c1174f8-42ca-427e-a9ff-0971d11fe12f" config-ref="HTTP_Listener_configurations" path="/amqrequestreplay"/>
+		<logger level="INFO" doc:name="Logg The Payload" doc:id="c0e3dc80-976d-4cb7-a15c-711702dc1c86" message="#['\n']  #['\n']  *********************** #['\n'] #['\n'] Send Payload is:  #['\n'] &#10; #[payload]  #['\n'] #['\n']&#10;*********************** #['\n']"/>
+		<jms:publish-consume doc:name="Publish consume" doc:id="449fcd05-7f6a-40f6-97e4-559a96cdbe19" destination="activeMQ_02" config-ref="JMS_Config">
+			<jms:message outboundContentType="application/json" >
+				<jms:reply-to destination="active-MQ_02_Reply" />
+			</jms:message>
+			<jms:publish-configuration persistentDelivery="true" />
+			<jms:consume-configuration maximumWait="45" maximumWaitUnit="SECONDS" />
+		</jms:publish-consume>
+		<logger level="INFO" doc:name="End Logger" doc:id="308ee2d9-91f7-42f1-a458-0d98b1375010" message="#['\n']  #['\n']  *********************** #['\n'] #['\n'] &#10;From Parent flow:&#10; #[payload]  #['\n'] #['\n']"/>
+	</flow>
+	<flow name="request-reply-consumer01" doc:id="39a8ad02-ad38-471a-af12-0847654ec000" >
+		<jms:listener doc:name="On New Message" doc:id="26c90330-749d-4c97-bd66-38ec12d02e86" config-ref="JMS_Config" destination="activeMQ_02" inboundContentType="application/json" numberOfConsumers="1">
+			<jms:consumer-type >
+				<jms:queue-consumer />
+			</jms:consumer-type>
+		</jms:listener>
+		<logger level="INFO" doc:name="Logger" doc:id="443d75a8-3f67-4160-8bca-df6c9061b23f" message="#['\n']  #['\n']  Message from consumer-01: #['\n'] &#10;#[payload] #['\n']"/>
+	</flow>
+</mule>

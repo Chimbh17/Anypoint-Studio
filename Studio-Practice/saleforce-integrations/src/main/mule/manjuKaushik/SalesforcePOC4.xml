@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="QueryandUpdate" doc:id="77cbb153-ce85-4537-9ad6-5c3ea3ac669e" >
+		<http:listener doc:name="Listener" doc:id="48aff6f5-fcf3-4ba0-b091-0ec2f11010e5" path="/session13/sfpoc4/queryupdate" config-ref="6065-manju-HTTP_Listener_config"/>
+		<ee:transform doc:name="Transform Message" doc:id="18d6f7ee-a150-4869-8e5f-af8f18d39e0c" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="setFilterID" ><![CDATA[attributes.queryParams.filterID]]></ee:set-variable>
+				<ee:set-variable variableName="setStudentID" ><![CDATA[attributes.queryParams.id]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<salesforce:query doc:name="Query" doc:id="5f59b3c7-40b7-49ab-bdc9-c786ee490886" config-ref="Salesforce_Config">
+			<salesforce:salesforce-query ><![CDATA[select Id, Name, StudentID__c, StudentLocation__c, StudentName__c, StudentSemester__c from StudentInformation__c]]></salesforce:salesforce-query>
+		</salesforce:query>
+		<ee:transform doc:name="FilterDataweave" doc:id="21fd72f3-b310-4e07-9644-53e7eceef9be" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+
+payload filter ((item, index) -> item.StudentID__c == vars.setFilterID)]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<choice doc:name="Choice" doc:id="2158b014-b854-4a0b-8b45-fd6f670ff224" >
+			<when expression='#[payload != null or payload != ""]'>
+				<ee:transform doc:name="Update The first Name" doc:id="d7ed1e8b-2c75-4f02-9d5a-0ca5eb55baa2">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/java
+---
+payload map (item , index) -> {
+	Id: item.Id,
+	StudentName__c: item.StudentName__c as String,
+	StudentID__c: vars.setStudentID as Number,
+	StudentLocation__c: item.StudentLocation__c as String,
+	StudentSemester__c: item.StudentSemester__c as Number
+}
+]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<salesforce:update doc:name="Update The record" doc:id="958f6aab-5952-411e-894e-5d9906e07b83" config-ref="Salesforce_Config" type="studentinformation__c"/>
+				<ee:transform doc:name="Transform Message" doc:id="a7aaf85e-abbb-4df6-b402-b07d10a9a523" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload
+
+]]></ee:set-payload>
+					</ee:message>
+					<ee:variables >
+					</ee:variables>
+				</ee:transform>
+				<logger level="INFO" doc:name="Logger" doc:id="aec263da-b875-4f36-997c-fad9d57fd51e" message="#['\n']  #['\n'] #['\n'] Updated successfully: #[payload] #['\n'] #['\n']"/>
+			</when>
+			<otherwise>
+				<ee:transform doc:name="Transform Message" doc:id="9cf09ab1-fba3-4567-a1ba-ca875a38fb34">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+				<logger level="INFO" doc:name="Print Payload" doc:id="7569b82d-a588-4e7a-977f-e64a6b4d3b99" message="#['\n'] #['\n'] #['\n'] Payload is Empty so , No Operation performed: #['\n']&#10;#['\n'] #[payload] #['\n']" />
+			</otherwise>
+		</choice>
+	</flow>
+</mule>

@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:jms="http://www.mulesoft.org/schema/mule/jms"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/current/mule-jms.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="mysql-active-mqFlow" doc:id="24f1c0fb-e095-41be-b807-b13eb928d354" >
+		<http:listener doc:name="Listener" doc:id="2ab2ae99-7fc9-4e8c-a9e4-0d71ca93caf5" config-ref="HTTP_Listener_configurations" path="/mysqlint"/>
+		<logger level="INFO" doc:name="Logger" doc:id="88e0f3d9-d878-4fdc-880a-5ae73129ba9d" message="#['\n']  #['\n']  Flow has been started , Incoming payload is:  #['\n']  #[payload]  #['\n']"/>
+		<jms:publish doc:name="Publish To Active-MQ Queue04 " doc:id="e0f670d4-5e40-4941-9796-3764eb96fc6f" config-ref="JMS_Config" destination="activeMQ_04"/>
+	</flow>
+	<flow name="mysql-active-mqFlow1" doc:id="71de7326-cd59-48bf-9a75-dbf403cf7693" >
+		<jms:listener doc:name="On New Message" doc:id="8b55203b-22c6-49c9-a7d8-334dbe9925c0" config-ref="JMS_Config" destination="activeMQ_04" numberOfConsumers="1"/>
+		<logger level="INFO" doc:name="Start Log" doc:id="abd78bd3-e704-4251-837c-03fb8a0cf80a" message="#['\n']  #['\n']  After Publish , Incoming payload From Active-MQ is:&#10;#[payload] #['\n']"/>
+		<db:insert doc:name="Insert To My-SQL" doc:id="410375f3-d3d7-408e-aa92-eeac6062feb6" config-ref="MySQL_Database_Config" target="mysqlInserted">
+			<db:sql ><![CDATA[INSERT INTO school.student(Roll_No , Name , Marks)
+VALUES (:Roll_No , :Name , :Marks) ;
+]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+	Roll_No: payload.rollNo , 
+	Name: payload.name , 
+	Marks: payload.marks
+}]]]></db:input-parameters>
+		</db:insert>
+		<ee:transform doc:name="Transform Message" doc:id="597c946c-59c8-4fbd-92b3-0400403920c6" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+{
+	"Inserted Payload in Database": vars.mysqlInserted ,
+	"Status": "Successfull"
+}]]></ee:set-payload>
+			</ee:message>
+			<ee:variables >
+			</ee:variables>
+		</ee:transform>
+		<logger level="INFO" doc:name="End Log" doc:id="a1cd8867-fec6-4848-a31c-44c370c9199c" message="#['\n'] #['\n']&#10;#[payload]&#10;&#10;  #['\n']******************* #['\n']"/>
+	</flow>
+	
+	<flow name="dead-letter-queue" doc:id="bafecba4-35a2-4200-a949-b64b840f5008" >
+		<jms:listener doc:name="On New Message" doc:id="5f89e29b-9d4c-421f-8b76-217e803b6e24" config-ref="JMS_Config" destination="ActiveMQ.DLQ" numberOfConsumers="1"/>
+		<logger level="INFO" doc:name="Start Log" doc:id="63e7cf67-130a-4a51-86ac-d8a7275d2b97" message="#['\n']  #['\n']  After Publish , Incoming payload From Active-MQ is:&#10;#[payload] #['\n']"/>
+		<db:insert doc:name="Insert To My-SQL" doc:id="81e3d072-e9be-4cc1-833b-e5dbcab1b5f1" config-ref="MySQL_Database_Config" target="mysqlInserted">
+			<db:sql ><![CDATA[INSERT INTO school.student(Roll_No , Name , Marks)
+VALUES (:Roll_No , :Name , :Marks) ;
+]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+	Roll_No: payload.rollNo , 
+	Name: payload.name , 
+	Marks: payload.marks
+}]]]></db:input-parameters>
+		</db:insert>
+		<ee:transform doc:name="Transform Message" doc:id="7276d749-32d0-45ad-929b-ba62376b9e3c" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+{
+	"Inserted Payload in Database": vars.mysqlInserted ,
+	"Status": "Successfull"
+}]]></ee:set-payload>
+			</ee:message>
+			<ee:variables >
+			</ee:variables>
+		</ee:transform>
+		<logger level="INFO" doc:name="End Log" doc:id="8623f937-92d2-40a6-93b8-8939c8aa7859" message="#['\n'] #['\n']&#10;#[payload]&#10;&#10;  #['\n']******************* #['\n']"/>
+	</flow>
+</mule>

@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:jms="http://www.mulesoft.org/schema/mule/jms"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd 
+http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/current/mule-jms.xsd 
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
+	<flow name="consume-component-difference" doc:id="fe82c046-92f1-4b4b-b278-a0dd8c3efafb" >
+		<http:listener doc:name="Listner" doc:id="6be6f380-a7af-475e-992e-226b1ac16d29" config-ref="HTTP_Listener_configurations" path="/send0023"/>
+		<ee:transform doc:name="Transform Message" doc:id="00cfbfcd-7a80-4c55-8dcc-bb08baf16963" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<jms:publish doc:name="Publish The Message To Que01 Of Active Mq" doc:id="6a522d98-b5d5-4afe-8245-5811e7e68caf" config-ref="JMS_Config" destination="activeMQ_01"/>
+		<jms:publish doc:name="Publish To Que03 Of Active Mq" doc:id="72eab9cf-2001-42b3-b038-5eb503671212" config-ref="JMS_Config" destination="activeMQ_03"/>
+		<logger level="INFO" doc:name="End Logger" doc:id="7c07ab5a-d2e7-4fe9-be48-48d269f8861c" message="#['\n'] #['\n'] ***************************#['\n']&#10;Main Flow: #['\n']   #[payload]"/>
+	
+</flow>
+	<flow name="consume-component-differenceFlow" doc:id="0e5ec983-b248-456b-813b-a2635a62cc15" >
+		<http:listener doc:name="Listener" doc:id="30b08b6c-f7f9-428e-8225-eb513c6db32f" config-ref="HTTP_Listener_configurations" path="/callActivemq03"/>
+		<jms:consume doc:name="Consume From Active Mq Queue03" doc:id="43276fbe-6155-4b40-8ea4-1b9e5bc76dc6" config-ref="JMS_Config" destination="activeMQ_03">
+			<jms:consumer-type >
+				<jms:queue-consumer />
+			</jms:consumer-type>
+		</jms:consume>
+		<logger level="INFO" doc:name="Logg The Payload" doc:id="6bbbb669-7dfc-4135-ab9a-683dbdbd21a9" message="#['\n'] #['\n'] ***************************#['\n']&#10;Active-Mq Oue Consume Flow: #['\n']   #[payload]"/>
+	</flow>
+	<flow name="Q-Subscriber011" doc:id="3f3285a8-8bf5-49ae-9b76-e5015b7dd89c" >
+		<jms:listener doc:name="Sbscribe To AcriveMQ" doc:id="8960f483-eb69-43e8-8873-f44edef4d37c" config-ref="JMS_Config" destination="activeMQ_01" numberOfConsumers="1" ackMode="AUTO" inboundContentType="application/json">
+			<jms:consumer-type >
+				<jms:queue-consumer />
+			</jms:consumer-type>
+		</jms:listener>
+		<ee:transform doc:name="Transform Message" doc:id="440d5f63-3e71-4a01-b76c-46fef0d9742e">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Start Log" doc:id="7bae0bc0-3528-4388-8ac6-e8393bf7eca3" message="#['\n'] #['\n'] ***************************#['\n']&#10;#[payload] #['\n']&#10;&#10; ********************** **********************" />
+	</flow>
+	<!-- [STUDIO:"Q-Subscriber022"]<flow name="Q-Subscriber022" doc:id="70326662-c62d-41f0-9041-6a2c11224a3e" >
+		<jms:listener doc:name="Sbscribe To AcriveMQ" doc:id="09eb3a5a-e4f9-4489-b870-efec5d3dccd9" config-ref="JMS_Config" destination="activeMQ_01" ackMode="AUTO" inboundContentType="application/json" numberOfConsumers="1" >
+			<jms:consumer-type >
+				<jms:queue-consumer />
+			</jms:consumer-type>
+		</jms:listener>
+		<logger level="INFO" doc:name="Start Log" doc:id="c533e3c8-8b96-4024-bb36-3a039bbeb30e" message="#['\n'&#93; #['\n'&#93;   *********************Q-Subscriber02****************************  #['\n'&#93; #['\n'&#93;" />
+		<ee:transform doc:name="Transform Message" doc:id="0239af36-b3a6-462b-9507-566830b52fc7" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+&#45;&#45;-
+payload&#93;&#93;></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="End Log" doc:id="4bbe707e-fd15-47d7-b156-9138943890e1" message="#['\n'&#93; #['\n'&#93;   #[payload&#93;      #['\n'&#93; #['\n'&#93;   *************************************************  #['\n'&#93; #['\n'&#93;" />
+	</flow> [STUDIO] -->
+	
+	</mule>

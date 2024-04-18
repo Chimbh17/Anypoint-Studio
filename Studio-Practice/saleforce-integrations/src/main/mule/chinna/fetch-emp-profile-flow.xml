@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="fetch-emp-profile-flowFlow" doc:id="20b33faf-3f8a-4918-b98b-07670e04f173" >
+		<http:listener doc:name="Listener" doc:id="760f25c1-6f94-4798-bcdb-1d51cbc3c488" config-ref="6062_HTTP_Listener_configurations" path="/fetch-emp-flow" allowedMethods="GET"/>
+		<logger level="INFO" doc:name="Logger" doc:id="5712afe7-6345-468b-bd94-d45472e06e2e" message="#['\n'] #['\n']  Fetching in process:  #['\n'] #['\n']"/>
+		<salesforce:query doc:name="Query" doc:id="28c00791-4f64-4fc0-bee1-83596ec2cc68" config-ref="Salesforce_Config">
+			<salesforce:salesforce-query ><![CDATA[SELECT Id, Name, emp_phone__c, emp_email__c, emp_skills__c FROM emp_profile__c WHERE 
+emp_skills__c = ':Skills']]></salesforce:salesforce-query>
+			<salesforce:parameters ><![CDATA[#[{
+	"Skills": attributes.queryParams.skill
+}]]]></salesforce:parameters>
+		</salesforce:query>
+		<ee:transform doc:name="Transform Message" doc:id="c70bca9f-98b6-4abb-a9e0-ec75c0fccd80" >
+			<ee:message >
+				<ee:set-payload resource="Datawave/fetch-employee.dwl" />
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="93a4b128-74aa-4500-bee5-fcd9ed3b13ee" message="#['\n'] #['\n'] #[payload] #['\n'] #['\n']"/>
+	</flow>
+</mule>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="publish-topicFlow" doc:id="44498a2a-20c5-480f-ab89-d62f54583339" >
+		<http:listener doc:name="Listener" doc:id="de417875-1a5c-4e63-8564-8307deba085e" config-ref="6062_HTTP_Listener_configurations" path="/publish"/>
+		<salesforce:publish-topic doc:name="Publish topic" doc:id="b5229ddf-7a67-425d-8fd8-cda64387da4a" config-ref="Salesforce_Config" topicName="#[payload.topic]" query="#[payload.query]" target="save"/>
+		<ee:transform doc:name="Transform Message" doc:id="434b3491-2371-4f89-b868-207f421eea34" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="9695a3e5-7653-4484-b080-7b3244558426" message="#['\n']  #['\n'] Topic is published succesfully :&#10;#['\n'] #[payload]"/>
+	</flow>
+</mule>

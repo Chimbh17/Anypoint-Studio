@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:jms="http://www.mulesoft.org/schema/mule/jms" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/current/mule-jms.xsd">
+	
+	<flow name="jms-brokerFlow" doc:id="be449a1c-fd23-4ad2-945f-10c04b65e87e" >
+		<!-- [STUDIO:"Scheduler"]<scheduler doc:name="Scheduler" doc:id="5b73b49d-8921-4959-8426-45ac69538748" >
+			<scheduling-strategy >
+				<fixed-frequency frequency="2" timeUnit="MINUTES"/>
+			</scheduling-strategy>
+		</scheduler> [STUDIO] -->
+		<logger level="INFO" doc:name="Start Logg" doc:id="37e88db9-0e98-4a99-9bae-49405773f2b0" message="#['\n']    #['\n']    publish profile flow has started    #['\n']   #['\n']"/>
+		<db:select doc:name="Select Emp Profile" doc:id="c4996e6b-96b3-45e0-a3c3-2428294e3187" config-ref="MySQL_Database_Config">
+			<db:sql ><![CDATA[SELECT * FROM  local_database.emp_profile ;]]></db:sql>
+		</db:select>
+		<ee:transform doc:name="Profile Payload" doc:id="75af6bce-fc2b-4ec3-b7d6-79e885d4700f" >
+			<ee:message >
+				<ee:set-payload resource="Dataweave/jms-chinna.dwl" />
+			</ee:message>
+		</ee:transform>
+		<jms:publish doc:name="Publish Emp Profiles" doc:id="6f9f9a4a-0ec8-4fbf-80b6-6a6cface8168" config-ref="JMS_Config" destination="Q.monster.profiles" persistentDelivery="true" disableMessageId="false" disableMessageTimestamp="false">
+			<jms:message outboundContentType="application/json" />
+		</jms:publish>
+		<logger level="INFO" doc:name="Logger" doc:id="581c54d1-4fba-4f0b-ac71-b9a0db336f4a" message="#['\n'] #['\n'] Flow has completed #['\n']   #['\n']"/>
+	</flow>
+</mule>

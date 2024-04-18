@@ -1,0 +1,8 @@
+httpListener:
+  
+  host: "localhost"
+  basePath: "/development" 
+  readTimeout: "3000"
+          
+http:
+  port: "6062"

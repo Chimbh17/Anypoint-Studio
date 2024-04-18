@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="salesforce-demoFlow" doc:id="57c15d48-ffd1-419a-89e6-b5b9f8483097" >
+		[STUDIO:"Listener"]<http:listener doc:name="Listener" doc:id="dce8416d-c010-4f9c-8c68-8cce4fccff77" config-ref="6062_HTTP_Listener_configurations" path="/emp-profiles"/> [STUDIO]
+		<ee:transform doc:name="Transform Message" doc:id="5f890cbf-13d8-4580-911a-7ad087d088cc" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+payload map (profile, indexOfProfile) -> {
+    Name: profile.empName,
+    emp_phone__c: profile.empPhone,
+    emp_email__c: profile.empEmail,
+    emp_skills__c: profile.empSkills
+}
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<salesforce:create type="emp_profile__c" doc:name="Create" doc:id="a777379b-ebad-477f-8bc4-5f306b70d8ff" config-ref="Salesforce_Config" target="savePayload"/>
+		<ee:transform doc:name="Transform Message" doc:id="33d6168e-58be-4a6e-ab3a-ff18b528f3ed" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload 
+]]></ee:set-payload>
+			</ee:message>
+			<ee:variables >
+			</ee:variables>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="4fde50ff-987f-49ed-8591-6f50eb4b8672" message="#['\n'] #['\n'] This records inserted into the salforce:&#10;#['\n'] #[payload] #['\n'] #['\n']"/>
+	</flow>
+</mule>

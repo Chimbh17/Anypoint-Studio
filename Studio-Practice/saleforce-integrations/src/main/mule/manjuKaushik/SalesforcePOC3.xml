@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="QueryAll" doc:id="b1a8f557-b573-4709-8f91-e5694242064e" >
+		<http:listener doc:name="Listener" doc:id="db4f9728-432c-4472-9a37-2e6a00b30188" config-ref="6062_HTTP_Listener_configurations" path="/session13/sfpoc3/queryall"/>
+		<logger level="INFO" doc:name="Logger" doc:id="4d7c93cf-331e-4363-bf6c-82183d7de7bb" message="#['\n'] -- Started"/>
+		<choice doc:name="Choice" doc:id="01cf878f-9e38-4e8a-8a2a-ac81ceb52296" >
+			<when expression='#[attributes.queryParams.choice == "1"]'>
+				<salesforce:query doc:name="Query" doc:id="2ef246af-97b2-4740-922b-78eb33512273" config-ref="Salesforce_Config" >
+					<salesforce:salesforce-query ><![CDATA[SELECT Id, StudentSemester__c, StudentLocation__c, StudentName__c, StudentID__c FROM studentinformation__c
+
+]]></salesforce:salesforce-query>
+				</salesforce:query>
+				<ee:transform doc:name="Transform Message To Payload" doc:id="8195ef5a-98ec-4bc1-b34a-5d507aa34bc9">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<logger level="INFO" doc:name="Log Payload" doc:id="4857674a-6ec9-4fa6-b44a-488c8f6d5937" message="#['\n'] #['\n']  #[payload]&#10;#['\n'] #['\n']"/>
+				<salesforce:query-all doc:name="Query all" doc:id="57da1901-5882-4d72-88f7-d5cb36dab757" config-ref="Salesforce_Config">
+			<salesforce:salesforce-query><![CDATA[SELECT Id, StudentSemester__c, StudentLocation__c, StudentName__c, StudentID__c FROM studentinformation__c
+
+]]></salesforce:salesforce-query>
+		</salesforce:query-all>
+				<ee:transform doc:name="Transform Message To Payload" doc:id="945bd552-bdfc-4806-96e5-5d36062161e8">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+				<logger level="INFO" doc:name="Payload" doc:id="909a18d7-e12a-4350-a2bb-c274dfafb455" message="#['\n'] #['\n']   #[payload]   #['\n'] #['\n']" />
+			</when>
+			<when expression='#[attributes.queryParams.choice == "2"]'>
+				<salesforce:query doc:name="Select ID and Name" doc:id="aa4781b0-e5b4-42ca-bb22-2ec3b3863e1b" config-ref="Salesforce_Config" >
+					<salesforce:salesforce-query ><![CDATA[select Id, Name, StudentID__c, StudentLocation__c, StudentName__c, StudentSemester__c from studentInformation__c where StudentID__c = :StudentId]]></salesforce:salesforce-query>
+					<salesforce:parameters ><![CDATA[#[output application/java
+---
+{
+	StudentId : attributes.queryParams.studentId
+}]]]></salesforce:parameters>
+				</salesforce:query>
+				<ee:transform doc:name="Transform Message" doc:id="de6c1aa4-0f08-493d-ad76-bfe8a8e95306">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/java
+---
+payload map {
+	Id: $.Id,
+	Name: $.Name
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<salesforce:delete doc:name="Delete Based on the Record" doc:id="30c066b6-f53c-467c-9377-a16333ee9329" config-ref="Salesforce_Config" >
+					<salesforce:ids ><![CDATA[#[payload.Id]]]></salesforce:ids>
+				</salesforce:delete>
+				<ee:transform doc:name="Transform Message" doc:id="e3543790-68b1-4788-9d75-d80c17ddfd12" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</when>
+			<otherwise>
+				<logger level="INFO" doc:name="Logger" doc:id="8e44a9ea-63fb-4083-ac19-59d12f72d638" message="#['\n'] #['\n'] #[payload] #['\n'] #['\n']"/>
+			</otherwise>
+		</choice>
+	</flow>
+</mule>

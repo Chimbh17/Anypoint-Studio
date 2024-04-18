@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:amqp="http://www.mulesoft.org/schema/mule/amqp" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/amqp http://www.mulesoft.org/schema/mule/amqp/current/mule-amqp.xsd">
+	<flow name="rabbit-mqFlow" doc:id="a94ea5f3-a8ec-4d8d-a6ad-6cb027ccd64e" >
+		<amqp:listener doc:name="Listener" doc:id="54983d76-f993-48c2-a48e-ff290be37aaa" config-ref="AMQP_Config" queueName="tutorialspedia.demo.queue" inboundContentType="application/json"/>
+		<logger level="INFO" doc:name="Logger" doc:id="bc79ad99-4036-4666-a53d-1f6bca40b49b" message="#['\n'] #['\n'] Payload comming from queue: #['\n']&#10;#[payload] #['\n'] #['\n']"/>
+		<amqp:publish doc:name="Publish" doc:id="86a054ec-66ca-4891-a68b-b90b6864b00b" config-ref="AMQP_Config" exchangeName="direct.exchange.demmo">
+			<amqp:routing-keys >
+				<amqp:routing-key value="1" />
+			</amqp:routing-keys>
+		</amqp:publish>
+		<logger level="INFO" doc:name="Logger" doc:id="96128310-fcd5-4f21-adc1-b5521622780c" message="#['\n'] #['\n']Message Published To Exchange" />
+	</flow>
+</mule>

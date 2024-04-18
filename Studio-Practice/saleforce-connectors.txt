@@ -1,0 +1,92 @@
+http://localhost:6062/development/fetch-emp-flow
+
+ %dw 2.0
+output application/java
+---
+payload map(profile , indexofprofile) -> {
+	Name: profile.empName,
+	emp_phone__c: profile.empPhone ,
+	emp_email__c: profile.empEmail ,
+	emp_skills__c: profile.empSkills
+} 
+  
+
+PushTopic pushTopic = new PushTopic();
+pushTopic.Name = 'sample2';
+pushTopic.Query = 'SELECT Id, Name, emp_phone__c, emp_email__c, emp_skills__c FROM emp_profile__c';
+pushTopic.ApiVersion = 60.0;
+pushTopic.NotifyForOperationCreate = true;
+pushTopic.NotifyForOperationUpdate = true;
+pushTopic.NotifyForOperationDelete = true;
+insert pushTopic;
+
+
+
+http://localhost:6062/development/fetch-emp-flow?skill=MuleSoft
+
+
+http://localhost:6062/development/create-topic
+
+---------------------------------------------------------------------------
+
+[
+    {
+        "empName": "bharat chim",
+        "empPhone": 4526354782,
+        "empEmail": "bharatchim17@gmail.com",
+        "empSkills": "MuleSoft"
+    },
+    {
+        "empName": "ajinkya deshmukh",
+        "empPhone": 7852461852,
+        "empEmail": "ajinkyadeshmukh@gmail.com",
+        "empSkills": "MuleSoft"
+    },
+    {
+        "empName": "Akash chim",
+        "empPhone": 2524932552,
+        "empEmail": "akashchim@gmail.com",
+        "empSkills": "javascript"
+    },
+    {
+        "empName": "akansha chim",
+        "empPhone": 2752462378,
+        "empEmail": "akansha@gmail.com",
+        "empSkills": "java"
+    }
+]
+------------------------------------------------------------------
+//Manju kaushik:
+
+%dw 2.0
+output application/java
+---
+payload map ((item, index) -> {
+	StudentName__c: payload.studentName,
+	StudentID__c: payload.studentId ,
+	StudentLocation__c: payload.studentAddress,
+	StudentSemester__c: payload.studentSemester
+})
+
+[{
+    "studentName" : "Bharat chim" ,
+    "studentId":  102,
+    "studentAddress": "jalaka Bhadang", 
+    "studentSemester":   2
+},
+
+
+{
+    "studentName" : "Bharat chim" ,
+    "studentId":  102,
+    "studentAddress": "jalaka Bhadang", 
+    "studentSemester":   2
+},
+{
+    "studentName" : "Bharat chim" ,
+    "studentId":  102,
+    "studentAddress": "jalaka Bhadang", 
+    "studentSemester":   2
+}
+
+]

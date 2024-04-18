@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd">
+	
+	<flow name="SalesforcePOC1-InsertData" doc:id="31fb0910-640a-4123-be45-21b880ab9c4c" >
+		<http:listener doc:name="Listener" doc:id="7754083d-8252-499a-8172-81e8fbb3cea9" config-ref="6062_HTTP_Listener_configurations" path="/session13/sfpoc1" allowedMethods="POST"/>
+		<ee:transform doc:name="Transform Message" doc:id="74018296-21a3-4bc6-a208-c926cf1561fd" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[
+%dw 2.0
+output application/java
+---
+ 
+payload map(items, index) -> {
+studentName__c: items.studentName,
+studentID__c: items.studentId,
+studentLocation__c: items.studentAddress,
+studentSemester__c: items.studentSemester
+ }
+ 
+ ]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<salesforce:create doc:name="Insert Records To Student Information" doc:id="0d24a881-feb2-44f1-afb9-27e2fba59551" config-ref="Salesforce_Config" target="save" doc:description='[{&#10;    "studentName" : "Bharat chim" ,&#10;    "studentId":  "102",&#10;    "studentAddress": "jalaka Bhadang", &#10;    "studentSemester":   "2"&#10;},&#10;&#10;&#10;{&#10;    "studentName" : "Rutuja chim" ,&#10;    "studentId":  "103",&#10;    "studentAddress": "pune", &#10;    "studentSemester":   "2"&#10;},&#10;{&#10;    "studentName" : "Rutuja yewale" ,&#10;    "studentId":  "104",&#10;    "studentAddress": "khamgaon", &#10;    "studentSemester":   "3"&#10;}&#10;&#10;]&#10;&#10;---------------------------------------------------------------------------------------&#10;&#10;[&#10;    {&#10;        "empName": "bharat chim",&#10;        "empPhone": 4526354782,&#10;        "empEmail": "bharatchim17@gmail.com",&#10;        "empSkills": "MuleSoft"&#10;    },&#10;    {&#10;        "empName": "ajinkya deshmukh",&#10;        "empPhone": 7852461852,&#10;        "empEmail": "ajinkyadeshmukh@gmail.com",&#10;        "empSkills": "MuleSoft"&#10;    },&#10;    {&#10;        "empName": "Akash chim",&#10;        "empPhone": 2524932552,&#10;        "empEmail": "akashchim@gmail.com",&#10;        "empSkills": "javascr&#10;' type="studentinformation__c"/>
+		<ee:transform doc:name="Transform Message" doc:id="5fbc19dc-bef2-4d01-bcff-ba2356699345">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="703f9a63-192c-47df-a6f4-11c9d4c57d70" message="#['\n'] #['\n'] Payload is send to saleforce: #['\n']&#10;#[payload]&#10;#['\n'] #['\n']"/>
+	</flow>
+	<flow name="SalesforcePOC1-Subscribe" doc:id="532819ea-333b-4df7-978d-2c7735e94ef8" >
+		<salesforce:subscribe-topic-listener topic="retrieveStuTopic" doc:name="Subscribe topic - retrieveStudentInfo" doc:id="99e90a25-2165-47e1-926a-04fc8479eabd" config-ref="Salesforce_Config" />
+		<ee:transform doc:name="Transform Message" doc:id="055838a5-76e2-4365-8a6c-498942cffe54" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="481b9713-aebe-4923-be0f-30020acdd648" message="#['\n']  #['\n'] Subscribed to the student object:&#10;#['\n'] #[payload]"/>
+	</flow>
+</mule>

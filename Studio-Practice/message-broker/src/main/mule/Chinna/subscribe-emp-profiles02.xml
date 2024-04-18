@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:jms="http://www.mulesoft.org/schema/mule/jms" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/current/mule-jms.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd">
+	
+	<flow name="subscribe-emp-profilesFlow02" doc:id="e4dddec8-32fd-4993-82d0-fe4d486d4008" >
+		<jms:listener doc:name="On New Message" doc:id="0976d2ed-db03-4fec-8a78-79fa813b7ac8" config-ref="JMS_Config" destination="Q.ABC.SAMPLE" inboundContentType="application/json" inboundEncoding="UTF-8" ackMode="MANUAL">
+			<jms:consumer-type >
+				<jms:queue-consumer />
+			
+</jms:consumer-type>
+			<jms:response sendCorrelationId="NEVER" />
+		</jms:listener>
+		<logger level="INFO" doc:name="Start Log" doc:id="c6eb795b-d263-481d-a826-ea841b815451" message="#['\n']  #['\n'] Flow log started    #['\n'] #['\n']"/>
+		<set-variable value="#[attributes.ackId]" doc:name="Set Variable" doc:id="e3145ccb-1d48-40da-a830-5b4020b32821" variableName="ackId"/>
+		<db:select doc:name="Select" doc:id="dfe19752-1eed-4b5b-b890-e1df718cc72a" config-ref="MySQL_Database_Config">
+			<db:sql ><![CDATA[select * from school.student ;]]></db:sql>
+		</db:select>
+		<logger level="INFO" doc:name="End Log" doc:id="c586388e-a8ca-4afc-8bf5-187810256937" message="#['\n'] #['\n']   #[payload]      #['\n'] #['\n']"/>
+		<jms:ack doc:name="Ack" doc:id="5584848e-fc7b-4633-a0cb-4f12cda31f61" ackId="#[vars.ackId]"/>
+	
+</flow>
+	</mule>

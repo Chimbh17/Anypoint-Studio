@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="create-eventFlow" doc:id="5fbbef0f-ffdf-49a4-a13a-5f9baddb285d" >
+		<salesforce:subscribe-topic-listener doc:name="Subscribe topic listener" doc:id="6a3f6e6a-ebf4-410c-bb94-65c03b3e732c" config-ref="Salesforce_Config" topic="sample2"/>
+		<logger level="INFO" doc:name="Logger" doc:id="f9c96944-6647-4581-a09b-fd139d5d0449" message="#['\n'] #['\n'] #[payload] #['\n'] #['\n']"/>
+		<choice doc:name="Choice" doc:id="e1d8f767-94ea-478f-9e74-fee9e2a824ef" >
+			<when expression="#[attributes.'type' == &quot;created&quot;]">
+				<db:insert doc:name="Insert" doc:id="b50aca07-e978-46c8-8b7b-527bf05a04c7" config-ref="Database_Config">
+					<db:sql ><![CDATA[INSERT INTO hr.emp_profile(
+emp_id , emp_phone , emp_email , emp_skills , emp_name)
+VALUES( 
+:empId , :empPhone , :empEmail , :empSkills , :empName);
+
+]]></db:sql>
+					<db:input-parameters ><![CDATA[#[{
+empId: payload.Id , 
+empPhone: payload.emp_phone__c , 
+empEmail: payload.emp_email__c , 
+empSkills: payload.emp_skills__c	,
+empName: payload.Name
+}]]]></db:input-parameters>
+				</db:insert>
+			</when>
+			<when expression="#[attributes.'type' == &quot;updated&quot;]">
+				<db:update doc:name="Update" doc:id="38141df4-feec-413a-90a5-3ea12144ed29" config-ref="Database_Config">
+					<db:sql ><![CDATA[UPDATE hr.emp_profile SET 
+ emp_phone = :empPhone , emp_email = :empEmail , emp_skills = :empSkills , emp_name = :empName ;
+]]></db:sql>
+					<db:input-parameters ><![CDATA[#[{
+
+empPhone: payload.emp_phone__c , 
+empEmail: payload.emp_email__c , 
+empSkills: payload.emp_skills__c	,
+empName: payload.Name
+}]]]></db:input-parameters>
+				</db:update>
+			</when>
+			<when expression="#[attributes.'type' == &quot;deleted&quot;]">
+				<db:delete doc:name="Delete" doc:id="a1b88f1f-e2cb-4d34-bed4-c321b5fc9652" config-ref="Database_Config">
+					<db:sql ><![CDATA[DELETE FROM hr.emp_profile WHERE emp_id = :empId ;
+]]></db:sql>
+					<db:input-parameters ><![CDATA[#[{
+empId: payload.Id 
+}]]]></db:input-parameters>
+				</db:delete>
+			</when>
+			<otherwise>
+				<logger level="INFO" doc:name="Logger" doc:id="f5408c89-f6da-421a-ad29-77788d48bcda" message="#['\n'] #['\n'] invalid event&#10; #['\n'] #['\n']"/>
+			</otherwise>
+		</choice>
+		<ee:transform doc:name="Transform Message" doc:id="6a150b31-9469-4e6e-9605-091aa051748b" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="dfde1d0a-53db-4805-a3b3-2bfae9cd1008" message="#['\n'] #['\n']  #[payload]"/>
+	</flow>
+</mule>

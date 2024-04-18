@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd">
+	<flow name="create-topicFlow" doc:id="f3de2238-f671-4302-8074-16f960d2ac07" >
+		<http:listener doc:name="Listener" doc:id="cf55178c-7627-4048-a2d9-264d9b62520b" config-ref="6062_HTTP_Listener_configurations" path="/create-topic"/>
+		<logger level="INFO" doc:name="Logger" doc:id="602ff81a-88b9-4ac0-b020-a0e68f5d590d" message="#['\n'] #['\n'] &#10;Creating Topic name as: #[payload.topic]  #['\n']&#10;Creating Query name as: #[payload.query]  #['\n']"/>
+		<salesforce:publish-topic doc:name="Publish topic" doc:id="686ee204-e2fe-442a-a6b8-f994c3bb0e27" config-ref="Salesforce_Config" topicName="#[payload.topic]" query="#[payload.query]"/>
+		<logger level="INFO" doc:name="Logger" doc:id="e90819a6-2e13-4f58-968e-dbc0d149fb3c" message="#['\n' ]  *******************************************************&#10;#['\n' ]"/>
+	</flow>
+</mule>
