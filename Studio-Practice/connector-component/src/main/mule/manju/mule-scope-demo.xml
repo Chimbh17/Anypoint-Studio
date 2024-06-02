@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:validation="http://www.mulesoft.org/schema/mule/validation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd">
+	<sub-flow name="insert-employee-subflow" doc:id="93f06827-0d62-4ec8-a9e5-47d25c0c8e3f" >
+		<try doc:name="Try" doc:id="e8a97031-bb94-4ac3-8c9e-79803b9c1ef9" >
+			<until-successful maxRetries="5" doc:name="Until Successful" doc:id="77cb4907-5647-455f-9fa3-39aef90d4d52" >
+				<db:insert doc:name="Insert" doc:id="bb2e40d9-92fc-4538-b0dd-ba6fca5d38a5" config-ref="Database_Config" target="empPayload">
+			<db:sql><![CDATA[INSERT INTO hr.emp_profile(
+emp_id , emp_phone , emp_email , emp_skills , emp_name)
+VALUES( 
+:emp_id , :emp_phone , :emp_email , :emp_skills , :emp_name );
+]]></db:sql>
+			<db:input-parameters><![CDATA[#[{
+	emp_id: payload.empId ,
+	emp_phone: payload.empPhone ,
+	emp_email: payload.email ,
+	emp_skills: payload.empSkill ,
+	emp_name: payload.empName
+}]]]></db:input-parameters>
+		</db:insert>
+			</until-successful>
+			<error-handler >
+				<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="95fc0e76-8bd6-4d77-9826-9308f46d21cc" >
+					<set-variable value="#[true]" doc:name="Set Variable" doc:id="3fb22b17-f288-4bdd-9f5f-d83653222d02" variableName="gotError"/>
+					<logger level="INFO" doc:name="Logger" doc:id="85c069ae-99ed-4d4c-ae90-5a0bc463cafc" message="#[payload]"/>
+				</on-error-continue>
+			</error-handler>
+		</try>
+	</sub-flow>
+	<flow name="mule-scope-demoFlow" doc:id="6d19ed93-da37-4915-a1e8-cdd6a51c9ac9" >
+		<http:listener doc:name="Listener" doc:id="f16a2b60-c8e6-4eb4-b719-86147466a8d5" config-ref="HTTP_Listener_config" path="/scope-demo"/>
+		<logger level="INFO" doc:name="Logger" doc:id="75bfd869-e106-42b6-8cc6-815d6024fab3" message="#['\n'] Started Demo flow:"/>
+		<async doc:name="Async" doc:id="4818fb6a-45c6-487f-95a0-43fdf6de8a9f" >
+			<logger level="INFO" doc:name="Logger" doc:id="0a912c82-343c-4e4a-8118-85016bcec80a" message="Iam async log"/>
+			<set-payload value="Iam Async payload" doc:name="Set Payload" doc:id="b8e17b93-1d23-4035-8940-833b0e5dbd6f" />
+		</async>
+		<set-variable value="#[payload]" doc:name="Set Variable" doc:id="70576786-0ce6-4c35-9e08-f3174aeab75e" variableName="empRecord"/>
+		<flow-ref doc:name="insert-employee-subflow" doc:id="fddded6e-6f7d-490a-b11d-c483afbc2c6c" name="insert-employee-subflow" target="paylaod"/>
+		<ee:transform doc:name="Transform Message" doc:id="0b740cca-c338-4421-ada0-3b07cc7db04f" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	sendedPayload: vars.empRecord ,
+	fromDatabase: vars.empPayload.affectedRows
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="206d9d37-f41b-46c5-98db-4fba2f0e18cf" message="#['\n'] flow has ended #[payload]"/>
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="7c18b1b6-5e8d-43f3-b962-dfc89dbdd3e1" type="ANY">
+				<logger level="INFO" doc:name="Logger" doc:id="bbc757dd-22a3-4d71-bccc-ae9015959ff7" message="#[payload]" />
+			</on-error-propagate>
+		</error-handler>
+	</flow>
+</mule>

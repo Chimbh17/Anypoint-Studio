@@ -1,0 +1,13 @@
+{
+  "sampleData": {
+    "ffcc173f-f87d-43ed-85cd-a49478f0d659": {
+      "vars-inpPayload": "sample_data/list_json_1.json"
+    },
+    "576b432d-7765-4e19-86de-7f81685b1adf": {
+      "vars-branchName": "sample_data/defaultstringtype_2.dwl"
+    },
+    "c0481dfd-6556-4b97-a1b7-675a91d3b66a": {
+      "vars-inpPayload": "sample_data/list_json.json"
+    }
+  }
+}

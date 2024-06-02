@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:ftp="http://www.mulesoft.org/schema/mule/ftp"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/ftp http://www.mulesoft.org/schema/mule/ftp/current/mule-ftp.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd">
+	<flow name="file-write-demoFlow" doc:id="66fd3864-f65c-4062-bfb4-22812dae9d9c" >
+		<!-- [STUDIO:"Scheduler"]<scheduler doc:name="Scheduler" doc:id="0968dfcc-8344-4bc1-aac8-d8a6f2bb89e6" >
+			<scheduling-strategy >
+				<fixed-frequency frequency="15" timeUnit="SECONDS"/>
+			</scheduling-strategy>
+		</scheduler> [STUDIO] -->
+		<db:select doc:name="Select" doc:id="49d9aca6-a5e9-4018-b543-c9c8ff3894b1" config-ref="Database_Config">
+			<db:sql ><![CDATA[SELECT * FROM emp_info.emp_profile;]]></db:sql>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="de263d05-c5fc-47d2-82ab-078ea02aa169" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/xlsx
+---
+{
+	employeeData: payload map ( payload01 , indexOfPayload01 ) -> {
+		empId: payload01.emp_Id,
+		empName: payload01.emp_Name,
+		empAddress: payload01.emp_Address,
+		empSalery: payload01.emp_Salery,
+		empPhone: payload01.emp_Phone,
+		empEmail: payload01.emp_Email
+	}
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<file:write doc:name="Write" doc:id="82490260-5eb9-4387-872d-50cf69ba9379" createParentDirectories="false" path="D:\Downloads\xxx4\FPT\employee.xlsx"/>
+	</flow>
+	<db:config name="Database_Config" doc:name="Database Config" doc:id="7942d3cc-a597-477b-b9ce-4cdab65b43b6" >
+		<db:my-sql-connection host="localhost" port="3306" user="root" password="chimbh17" />
+	</db:config>
+	<flow name="emp-read-fileFlow" doc:id="8eb660a0-0845-4e25-8a03-f3941f05754a" >
+		<!-- [STUDIO:"Scheduler"]<scheduler doc:name="Scheduler" doc:id="579bf475-3785-4cb8-af8a-8623f7b4aa4d" >
+			<scheduling-strategy >
+				<fixed-frequency frequency="30" timeUnit="SECONDS"/>
+			</scheduling-strategy>
+		</scheduler> [STUDIO] -->
+		<file:read doc:name="Read" doc:id="2b1623d7-2c98-4859-8715-394b2f40da4f" path="D:\Downloads\xxx4\amar.csv"/>
+		<ee:transform doc:name="Transform Message" doc:id="38c82cdf-338a-4fc8-b1d1-f8b5047a5cf5" >
+			<ee:message >
+				<ee:set-payload resource="dataweave/csv-to-json.dwl" />
+			</ee:message>
+		</ee:transform>
+		<db:bulk-insert doc:name="Bulk insert" doc:id="06ec5037-ba4a-481c-a1fd-5532ff482fad" config-ref="Database_Config">
+			<db:sql ><![CDATA[INSERT INTO emp_info.emp_profile(
+emp_Id , emp_Name  , emp_Address , emp_Salery , emp_Phone , emp_Email )
+VALUES(:emp_Id , :emp_Name  , :emp_Address , :emp_Salery , :emp_Phone , :emp_Email);]]></db:sql>
+		</db:bulk-insert>
+		<logger level="INFO" doc:name="Logger" doc:id="bc6d77cf-1397-4e9e-bf66-4d2bd1658dfe" message="#[payload]"/>
+	</flow>
+</mule>

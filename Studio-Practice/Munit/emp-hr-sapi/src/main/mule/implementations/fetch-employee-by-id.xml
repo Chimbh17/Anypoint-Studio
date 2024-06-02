@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd">
+	<flow name="get:\employee\(empID):emp-hr-sapi-config">
+		<logger level="INFO" doc:name="Entry Log" doc:id="ada9521d-7104-4faa-8506-a329c2419f97" message="Transaction [#[vars.transactionId]] - Started get employee flow and URI param is : #[attributes.uriParams.empID]"/>
+		<set-variable value="#[attributes.uriParams.empID]" doc:name="Set employeeID" doc:id="3da1937d-b931-4805-83db-a51305c784f0" variableName="employeeID"/>
+		<db:select doc:name="Fetch EMP_MASTER" doc:id="221c1367-7ccb-47a7-b4cf-9f2aa54aa03f" config-ref="Database_Config">
+			<db:sql ><![CDATA[select emp_id, emp_name, emp_address, emp_status from hr.emp_master where emp_id=:emp_id]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+	"emp_id": vars.employeeID
+}]]]></db:input-parameters>
+		</db:select>
+		<ee:transform doc:name="Prepare Response" doc:id="a8823078-0901-4a81-8eba-afc13d7c5c10">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	employeeID: payload[0].emp_id,
+	employeeName: payload[0].emp_name,
+	employeeAddress: payload[0].emp_address,
+	employeeStatus: payload[0].emp_status
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="End Log" doc:id="4ac57f31-56c6-4eb7-afe4-aa99babef18c" message="Completed fetch employee by id flow"/>
+    
+</flow>
+	</mule>

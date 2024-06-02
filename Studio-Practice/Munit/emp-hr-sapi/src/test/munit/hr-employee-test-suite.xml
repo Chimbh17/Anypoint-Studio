@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:munit="http://www.mulesoft.org/schema/mule/munit"
+	xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	<munit:config name="create-hr-employee-test-suite.xml" />
+	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="04c20bb7-0327-4c3b-8029-dac140bd9580" basePath="/api" >
+		<http:request-connection host="localhost" port="8081" />
+	</http:request-config>
+	<munit:test name="create-hr-employee-test-suite-post:\create-employee:application\json:emp-hr-sapi-configTest" doc:id="056ab243-209d-4778-b0e9-921a83718d58" description="Test">
+		<munit:enable-flow-sources >
+			<munit:enable-flow-source value="emp-hr-sapi-main" />
+			<munit:enable-flow-source value="post:\create-employee:application\json:emp-hr-sapi-config" />
+		</munit:enable-flow-sources>
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock Database Call" doc:id="36df94d4-963c-48fb-b656-5f5180da6de5" processor="db:insert">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="827fe954-e405-47d8-af37-ed8f4cf47f74" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[1]" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution>
+			<set-payload value="#[output application/json --- readUrl('classpath://testResources/create_employee_request.dwl')]" doc:name="Set Create Employee Payload" doc:id="e8497b16-ea67-4235-ae29-189063600e02" />
+			<http:request method="POST" doc:name="Request Create Employee API" doc:id="b7c8d550-4634-4afc-96cb-beb23b9df731" config-ref="HTTP_Request_configuration" path="/create-employee" responseTimeout="60000">
+				<http:headers ><![CDATA[#[output application/java
+---
+{
+	"Accept" : "application/json",
+	"Content-Type" : "application/json"
+}]]]></http:headers>
+			</http:request>
+		</munit:execution>
+		<munit:validation >
+			<logger level="INFO" doc:name="Info Log" doc:id="781f199b-97ad-456c-9797-c0be529d24c7" message="#[payload]"/>
+			<munit-tools:assert doc:name="Assert Success Response Attribute Status Code" doc:id="de20d21d-0dd3-46b3-a2c7-5e675a5a300e" message="The response statu code is not 201">
+				<munit-tools:that ><![CDATA[#[%dw 2.0
+import testResources::create_employee_response
+---
+create_employee_response::main({payload: payload, attributes: attributes, vars:vars})]]]></munit-tools:that>
+			</munit-tools:assert>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="hr-employee-test-suiteTest" doc:id="3f7a5486-b0ad-487c-890c-86c255165e8f" >
+		<munit:enable-flow-sources >
+			<munit:enable-flow-source value="emp-hr-sapi-main" />
+			<munit:enable-flow-source value="get:\employee\(empID):emp-hr-sapi-config" />
+		</munit:enable-flow-sources>
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock Database Call" doc:id="35fc731f-6c10-4663-b182-b4218faa23fe" processor="db:select">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="221c1367-7ccb-47a7-b4cf-9f2aa54aa03f" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[readUrl('classpath://testResources/mock_get_emp_database_payload.json')]" mediaType="application/java" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<http:request method="GET" doc:name="Request Get Employee By ID" doc:id="bc1f251a-67e1-4fe9-bbe5-e5a16130a3b4" config-ref="HTTP_Request_configuration" path="/employee/{empID}" responseTimeout="120000">
+				<http:uri-params ><![CDATA[#[readUrl('classpath://testResources/get_employee_uri_param.json')]]]></http:uri-params>
+			</http:request>
+		</munit:execution>
+		<munit:validation >
+			<logger level="INFO" doc:name="Info Log" doc:id="82d3c359-3454-445f-82b1-0d8c825dd925" message="#[payload]"/>
+			<munit-tools:assert-equals doc:name="Assert HTTP Status 200" doc:id="aace6664-29c6-4e84-9f21-a030ae5b4d66" actual="#[attributes.statusCode]" expected="#[200]" message='#["The HTTP status code is invalid"]'/>
+			<munit-tools:assert-equals doc:name="Assert Get Employee Response" doc:id="361ca31c-73a4-453b-85f9-9684ed45c694" actual="#[payload]" expected="#[readUrl('classpath://testResources/assert_get_emp_response.json')]" message='#["Payload is not valid"]'/>
+		</munit:validation>
+	</munit:test>
+</mule>

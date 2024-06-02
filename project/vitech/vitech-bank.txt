@@ -1,0 +1,21 @@
+//vitech-bank
+
+https://anypoint.mulesoft.com/mocking/api/v1/links/f08eb69f-7e4f-4fb0-9486-99b2f0f8e2e2/createAccount?customerName=bharatchim&bank=ICICI&type=savings&branchName=branchName
+   {
+    "accountNumber": "0123456789",
+    "atmPin": "1234" ,
+    "ifsCode": "HDFC000" ,
+    "depositAmount": 10000 , 
+    "mailId": "bharatchim17@gmail.com" ,
+    "contact": 78247852
+    }
+
+http://localhost:8081/api/createAccount?customerName=bharat chim&bank=ICICI&type=savings&branchName=khamgaon
+   {
+    "accountNumber": "0123456782",
+    "atmPin": "1234" ,
+    "ifsCode": "ICICI000" ,
+    "depositAmount": 10000 , 
+    "mailId": "bharat.chim@mmit.edu.in" ,
+    "contact": 45254552
+    }

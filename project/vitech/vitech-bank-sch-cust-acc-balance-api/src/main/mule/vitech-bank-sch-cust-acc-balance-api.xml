@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:email="http://www.mulesoft.org/schema/mule/email"
+	xmlns:snowflake="http://www.mulesoft.org/schema/mule/snowflake"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/snowflake http://www.mulesoft.org/schema/mule/snowflake/current/mule-snowflake.xsd
+http://www.mulesoft.org/schema/mule/email http://www.mulesoft.org/schema/mule/email/current/mule-email.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	
+		
+	
+	<flow name="vitech-bank-sch-cust-acc-balance-apiFlow" doc:id="3c69bfe4-c26f-4269-b99d-300b469cdf8a" >
+		<scheduler doc:name="Scheduler" doc:id="3d72f24e-eab8-4ca3-990c-93c2e56c13f9" >
+			<scheduling-strategy >
+				<cron expression="0 0/2 * 1/1 * ? *" timeZone="Asia/Kolkata"/>
+			</scheduling-strategy>
+		</scheduler>
+		<logger level="TRACE" doc:name="Logger" doc:id="dc88201c-882f-4933-be49-4abe24c9b686" message="#['\n'] #['\n']&#10; Batch job has started:&#10;#['\n'] #['\n']"/>
+		<snowflake:select doc:name="Select" doc:id="d1d00b7c-6043-4262-8ccd-2f169a94a4ec" config-ref="Snowflake_Config00">
+			<snowflake:sql ><![CDATA[SELECT * FROM Bank_Transactions;]]></snowflake:sql>
+		</snowflake:select>
+		<foreach doc:name="For Each" doc:id="6f69e8d3-2e7c-4087-acbe-e2acd842fd68" >
+			<ee:transform doc:name="Transform Message" doc:id="292d0e09-a359-4aa1-91ae-b6a52b7566f6" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+				</ee:message>
+			</ee:transform>
+			<email:send doc:name="Send The Bloddy Mail" doc:id="ee32aa56-19c4-4000-aba0-49e664607330" config-ref="Email_SMTP_Config" fromAddress="${email.user}" subject="#[&quot;Today's Total Balance:&quot; ++ payload.BANKNAME]">
+				<email:to-addresses >
+					<email:to-address value="#[payload.MAILID as String]" />
+				</email:to-addresses>
+				<email:body >
+					<email:content ><![CDATA[#["Your Total Balance as On Today's:" ++ payload.BANKNAME]]]></email:content>
+				</email:body>
+			</email:send>
+		</foreach>
+	</flow>
+</mule>

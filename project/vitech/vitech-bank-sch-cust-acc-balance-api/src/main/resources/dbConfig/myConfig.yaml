@@ -1,0 +1,25 @@
+email:
+  host:     "smtp.gmail.com" 
+  user:     "bharatchim17@gmail.com" 
+  password: "jbjb azew ztpz gjud" 
+  port:     "587"
+  
+  
+# ${email.port}
+
+
+snowDb:
+  accountName: "rr51301.central-india.azure" 
+  warehouse:   "COMPUTE_WH" 
+  database:    "VITECH" 
+  schema:      "BFS" 
+  user:        "bharatchim17" 
+  password:    "Durgachim@17" 
+  role:        "ACCOUNTADMIN" 
+  
+
+
+
+# ${snowDb.}
+# accountName="rr51301.central-india.azure" warehouse="COMPUTE_WH" database="VITECH"
+# schema="BFS" user="bharatchim17" password="Durgachim@17" role="ACCOUNTADMIN" 

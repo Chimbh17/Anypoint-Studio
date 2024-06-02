@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
+	
+	<snowflake:snowflake-config name="Snowflake_Config" doc:name="Snowflake Config" doc:id="ce0028c4-ddb7-4570-baba-2c692b8ceb79" >
+		<snowflake:snowflake-connection accountName="${snow.accountName}" warehouse="${snow.warehouse}" database="${snow.database}" schema="${snow.schema}" user="${snow.user}" password="${snow.password}" role="${snow.role}" />
+	</snowflake:snowflake-config>
+	<configuration-properties doc:name="Configuration properties" doc:id="d75d36a8-e78f-4fd8-9d14-5d62e64d01cd" file="dev-snowflakes-config.yaml" />
+	</mule>
