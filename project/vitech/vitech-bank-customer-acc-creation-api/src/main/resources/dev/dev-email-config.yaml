@@ -1,0 +1,8 @@
+email:
+  host:     "smtp.gmail.com" 
+  user:     "bharatchim17@gmail.com" 
+  password: "jbjb azew ztpz gjud" 
+  port:     "587"
+  
+  
+# ${email.port}

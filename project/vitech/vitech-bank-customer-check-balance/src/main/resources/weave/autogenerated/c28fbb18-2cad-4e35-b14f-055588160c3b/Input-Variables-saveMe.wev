@@ -1,0 +1,4 @@
+%dw 2.0
+
+type auto_c28fbb18_2cad_4e35_b14f_055588160c3b_Input_Variables_saveMe = Array<{|  CID: Number,   CUSTNAME: String,   CUSTACOUNTNUM: String,   BANKNAME: String,   ACCOUNTTYPE: String,   IFSCCODE: String,   BRANCHNAME: String,   TOTALBALANCE: Number,   TRANSACTIONTIMESTAMP: String,   ACCOUNTSTATUS: String,   WRONGPIN?: Number,   MAILID: String,   PHONENUMBER: String,   ATMPIN?: String|}>
+

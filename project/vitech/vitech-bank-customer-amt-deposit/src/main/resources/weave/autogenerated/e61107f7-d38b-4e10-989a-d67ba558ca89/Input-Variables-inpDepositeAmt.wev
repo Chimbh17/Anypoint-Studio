@@ -1,0 +1,4 @@
+%dw 2.0
+
+type auto_e61107f7_d38b_4e10_989a_d67ba558ca89_Input_Variables_inpDepositeAmt = Number
+

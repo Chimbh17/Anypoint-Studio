@@ -1,0 +1,15 @@
+snow:
+  accountName: "rr51301.central-india.azure" 
+  warehouse:   "COMPUTE_WH" 
+  database:    "VITECH" 
+  schema:      "BFS" 
+  user:        "bharatchim17" 
+  password:    "Durgachim@17" 
+  role:        "ACCOUNTADMIN" 
+  
+
+
+
+# ${snow.}
+# accountName="rr51301.central-india.azure" warehouse="COMPUTE_WH" database="VITECH"
+# schema="BFS" user="bharatchim17" password="Durgachim@17" role="ACCOUNTADMIN" 

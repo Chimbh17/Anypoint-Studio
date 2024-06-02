@@ -7,8 +7,8 @@ http://www.mulesoft.org/schema/mule/snowflake http://www.mulesoft.org/schema/mul
 	
 	
 	<snowflake:snowflake-config name="Snowflake_Config" doc:name="Snowflake Config" doc:id="c59573c9-1a68-4a69-9808-56748d4b5711" >
-		<snowflake:snowflake-connection accountName="${snow.accountName}" warehouse="${snow.warehouse}" database="${snow.database}" schema="${snow.schema}" user="${snow.user}" password="${snow.password}" role="${snow.role}" />
+		<snowflake:snowflake-connection accountName="${snowDb.accountName}" warehouse="${snowDb.warehouse}" database="${snowDb.database}" schema="${snowDb.schema}" user="${snowDb.user}" password="${snowDb.password}" role="${snowDb.role}" />
 	</snowflake:snowflake-config>
-	<configuration-properties doc:name="Configuration properties" doc:id="e1c9f083-921b-4730-976e-bd64250b7eae" file="dev/dev-snowflakes-config.yaml" />
+	<configuration-properties doc:name="Configuration properties" doc:id="e1c9f083-921b-4730-976e-bd64250b7eae" file="globalConfig/myConfig.yaml" />
 	
 </mule>

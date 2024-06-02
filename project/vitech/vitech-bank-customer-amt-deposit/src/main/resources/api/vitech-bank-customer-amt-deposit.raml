@@ -1,0 +1,54 @@
+#%RAML 1.0
+title: vitech-bank-customer-amt-deposit
+version: v1 
+protocols:
+  - HTTP
+  - HTTPS
+mediaType: application/json
+
+securitySchemes:
+  secure: !include /security/securityScheme.raml
+
+securedBy:
+  - secure
+
+/deposit:
+  put:
+    body:
+      properties:
+        accountNumber:
+          required: true
+          type: string
+          minLength: 10
+          maxLength: 10 
+        bank:
+          required: true
+          enum:
+            - ICICI
+            - HDFC
+            - SBI
+            - AXIS
+        depositeAmount:
+          required: true
+          type: integer
+      example:
+        {
+          
+  "accountNumber": "0123456789",
+  "bank": "ICICI",
+  "depositeAmount": 0
+
+        }
+      
+        
+    responses:
+      200:
+        body:
+          appliocation/json:
+            example:
+              {
+                
+                  "Status": "Amount deposite successfully done for the account number: xxxxx"
+                
+              }
+

@@ -19,3 +19,5 @@ http://localhost:8081/api/createAccount?customerName=bharat chim&bank=ICICI&type
     "mailId": "bharat.chim@mmit.edu.in" ,
     "contact": 45254552
     }
+
+//https://github.com/vitschool92/Mule-Realtime-Project-Sessions/tree/class_notes

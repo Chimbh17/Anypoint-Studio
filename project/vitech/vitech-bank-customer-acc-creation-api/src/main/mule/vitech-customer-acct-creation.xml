@@ -5,13 +5,13 @@ http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/cu
 http://www.mulesoft.org/schema/mule/email http://www.mulesoft.org/schema/mule/email/current/mule-email.xsd">
     <apikit:config name="vitech-customer-acct-creation-config" api="vitech-customer-acct-creation.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
     <flow name="vitech-customer-acct-creation-main">
-        <http:listener config-ref="vitech-customer-acct-creation-httpListenerConfig" path="/api/*">
+        <http:listener config-ref="httpListenerConfig" path="/api/*">
             <http:response statusCode="#[vars.httpStatus default 200]">
-                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
             </http:response>
             <http:error-response statusCode="#[vars.httpStatus default 500]">
-                <http:body>#[payload]</http:body>
-                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+                <http:body><![CDATA[#[payload]]]></http:body>
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
             </http:error-response>
         </http:listener>
         <apikit:router config-ref="vitech-customer-acct-creation-config" />
@@ -110,13 +110,13 @@ output application/json
 		<logger level="INFO" doc:name="Logger" doc:id="e9120129-1276-406c-94c0-fb8269d99bff" message="#['\n']&#10;----------------&#10;#['\n']&#10;&quot;After sending mail:&quot;&#10;#['\n']&#10;----------------&#10;#['\n']"/>
 	</flow>
 	<flow name="vitech-customer-acct-creation-console">
-        <http:listener config-ref="vitech-customer-acct-creation-httpListenerConfig" path="/console/*">
+        <http:listener config-ref="httpListenerConfig" path="/console/*">
             <http:response statusCode="#[vars.httpStatus default 200]">
-                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
             </http:response>
             <http:error-response statusCode="#[vars.httpStatus default 500]">
-                <http:body>#[payload]</http:body>
-                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+                <http:body><![CDATA[#[payload]]]></http:body>
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
             </http:error-response>
         </http:listener>
         <apikit:console config-ref="vitech-customer-acct-creation-config" />
@@ -182,13 +182,13 @@ VALUES(:custName , :custAcountNum , :bankName , :accountType , :ifscCode , :bran
 );]]></snowflake:sql>
 					<snowflake:input-parameters ><![CDATA[#[{(
 	vars.inpPayload map {
-	 custName: vars.customerName, 
-	 custAcountNum: $.accountNumber , 
-	 bankName: vars.bank , 
-	 accountType: vars."type" , 
-	ifscCode: $.ifsCode , 
-	 branchName: vars.branchName , 
- transactionTimeStamp: now() , 
+custName: vars.customerName, 
+custAcountNum: $.accountNumber , 
+bankName: vars.bank , 
+accountType: vars."type" , 
+ifscCode: $.ifsCode , 
+branchName: vars.branchName , 
+transactionTimeStamp: now() , 
 mailId: $.mailId , 
 phoneNumber: $.contact
 })}]]]></snowflake:input-parameters>
