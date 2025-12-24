@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:jms="http://www.mulesoft.org/schema/mule/jms"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/current/mule-jms.xsd 
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<!-- Flow A: API Layer -->
+<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="d8cd6eb1-d635-4dcc-82ad-6842355d4d6d" >
+		<http:listener-connection host="0.0.0.0" port="9091" />
+	</http:listener-config>
+	<flow name="order-api-flow">
+    <http:listener config-ref="HTTP_Listener_config" path="/order" doc:name="Order API"/>
+    
+    <!-- Validate payment synchronously -->
+    <choice doc:name="Payment Validation">
+        <when expression="#[payload.paymentStatus == 'VALID']">
+            <!-- Publish to JMS asynchronously -->
+            <jms:publish config-ref="JMS_Config" destination="order.queue" doc:name="Publish Order"/>
+            
+            <!-- Quick acknowledgement -->
+            <set-payload value="Order received successfully" doc:name="Ack Response"/>
+        </when>
+        <otherwise>
+            <set-payload value="Payment failed" doc:name="Error Response"/>
+        </otherwise>
+    </choice>
+</flow>
+
+<!-- Flow B: Backend Processing -->
+<flow name="order-fulfillment-flow">
+    <jms:listener config-ref="JMS_Config" destination="order.queue" doc:name="Order Queue Listener"/>
+    
+    <!-- Long-running backend tasks -->
+    <logger message="Processing order fulfillment..." level="INFO"/>
+    <logger message="Shipment initiated..." level="INFO"/>
+    <logger message="Delivery scheduled..." level="INFO"/>
+</flow>
+</mule>
