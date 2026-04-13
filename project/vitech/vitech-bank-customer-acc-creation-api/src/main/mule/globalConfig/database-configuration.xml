@@ -4,11 +4,9 @@
 	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/snowflake http://www.mulesoft.org/schema/mule/snowflake/current/mule-snowflake.xsd">
-	
-	
-	<snowflake:snowflake-config name="Snowflake_Config" doc:name="Snowflake Config" doc:id="c59573c9-1a68-4a69-9808-56748d4b5711" >
+	<snowflake:snowflake-config name="Snowflake_Config" doc:name="Snowflake Config" doc:id="98e64fa9-f37c-41ff-9692-0eda1dd3231e" >
 		<snowflake:snowflake-connection accountName="${snow.accountName}" warehouse="${snow.warehouse}" database="${snow.database}" schema="${snow.schema}" user="${snow.user}" password="${snow.password}" role="${snow.role}" />
 	</snowflake:snowflake-config>
-	<configuration-properties doc:name="Configuration properties" doc:id="e1c9f083-921b-4730-976e-bd64250b7eae" file="dev/dev-snowflakes-config.yaml" />
+	<configuration-properties doc:name="Configuration properties" doc:id="7d569c17-170f-4c81-b0f3-4be0f05d913c" file="dev-snowflakes-config.yaml" />
 	
 </mule>

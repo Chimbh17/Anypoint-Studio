@@ -1,0 +1,252 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns:snowflake="http://www.mulesoft.org/schema/mule/snowflake"
+	xmlns:email="http://www.mulesoft.org/schema/mule/email" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/email http://www.mulesoft.org/schema/mule/email/current/mule-email.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd 
+http://www.mulesoft.org/schema/mule/snowflake http://www.mulesoft.org/schema/mule/snowflake/current/mule-snowflake.xsd">
+   
+    <apikit:config name="vitech-customer-acct-creation-config" api="vitech-customer-acct-creation.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
+	<configuration-properties doc:name="Configuration properties" doc:id="724d8ac4-4fe1-4500-9c69-b9449aa16c17" file="myConfig-dev.yaml" />
+	<snowflake:snowflake-config name="Snowflake_Config" doc:name="Snowflake Config" doc:id="3466635d-ad18-4002-b7b1-d3f50d042157" >
+		<snowflake:snowflake-connection accountName="${db.sfc.accountName}" warehouse="${db.sfc.warehouse}" database="${db.sfc.database}" schema="${db.sfc.schema}" user="${db.sfc.user}" password="${db.sfc.password}" role="${db.sfc.role}" />
+	</snowflake:snowflake-config>
+	<email:smtp-config name="Email_SMTP" doc:name="Email SMTP" doc:id="ff269109-5e68-44f2-b43c-8907eaa39047" >
+		<email:smtp-connection host="${email.host}" user="${email.user}" password="${email.password}" port="${email.port}" connectionTimeout="10000">
+			<email:properties >
+				<email:property key="mail.smtp.starttls.enable" value="true" />
+			</email:properties>
+		</email:smtp-connection>
+	</email:smtp-config>
+	<configuration-properties doc:name="Configuration properties" doc:id="fc0eb358-6fff-454b-84c0-340f5cec8819" file="dev-email-config.yaml" />
+	<ee:object-store-caching-strategy name="Caching_Strategy" doc:name="Caching Strategy" doc:id="debdb7ab-34ba-4c46-b864-62e053364a14" keyGenerationExpression="#[vars.setInput.accountNumber]" />
+	<flow name="vitech-customer-acct-creation-main">
+        <http:listener path="/api/*" config-ref="vitech-customer-acct-creation-httpListenerConfig">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body><![CDATA[#[payload]]]></http:body>
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:router config-ref="vitech-customer-acct-creation-config" />
+        <error-handler>
+            <on-error-propagate type="APIKIT:BAD_REQUEST">
+                <ee:transform doc:name="Transform Message">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Bad request"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">400</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_FOUND">
+                <ee:transform doc:name="Transform Message">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Resource not found"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">404</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:METHOD_NOT_ALLOWED">
+                <ee:transform doc:name="Transform Message">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Method not allowed"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">405</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_ACCEPTABLE">
+                <ee:transform doc:name="Transform Message">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Not acceptable"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">406</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:UNSUPPORTED_MEDIA_TYPE">
+                <ee:transform doc:name="Transform Message">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Unsupported media type"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">415</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_IMPLEMENTED">
+                <ee:transform doc:name="Transform Message">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Not Implemented"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">501</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+        </error-handler>
+    </flow>
+    <flow name="vitech-customer-acct-creation-console">
+        <http:listener path="/console/*" config-ref="vitech-customer-acct-creation-httpListenerConfig">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body><![CDATA[#[payload]]]></http:body>
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:console config-ref="vitech-customer-acct-creation-config" />
+        <error-handler>
+            <on-error-propagate type="APIKIT:NOT_FOUND">
+                <ee:transform doc:name="Transform Message">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Resource not found"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">404</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+        </error-handler>
+    </flow>
+    
+    <flow name="vitech-customer-acct-email" doc:id="c0ee03da-51e7-4c39-8323-612d9b6ed324" >
+		<logger level="INFO" doc:name="Logger-1" doc:id="e8932d5e-8e5f-4b6b-baf8-a65aaba7a14d" message="#['\n']&#10;----------------&#10;#['\n']&#10;----------------&gt; &quot;Before sending mail:&quot;&#10;#['\n']&#10;----------------&#10;#['\n']"/>
+		<set-variable value='#[%dw 2.0&#10;output application/json&#10;---&#10;"Congratulations! Your account has been created successfully... Account Number: "&#10;++ (vars.setInput.accountNumber default "" as String)&#10;++ ", Bank: "&#10;++ (vars.setInput.bank default "" as String)]' doc:name="Set Variable" doc:id="1c4fd1a7-81f7-4614-a5d0-0dc364843959" variableName="emailBody"/>
+		<parse-template doc:name="Parse Template" doc:id="0e2f8a20-13e9-46d7-96d0-9d26d74a7e84" location="html\email.template"/>
+		<email:send doc:name="Send" doc:id="4d31382c-6494-42e2-80b7-e25c945a7195" subject='#["Congratulations..! Account created in " ++ vars.setInput.bank]' fromAddress="${email.user}" config-ref="Email_SMTP">
+			<email:to-addresses >
+				<email:to-address value="#[vars.setInput.email]" />
+			</email:to-addresses>
+			<email:body contentType="text/html" encoding="UTF-8" >
+			</email:body>
+		</email:send>
+		<logger level="INFO" doc:name="Logger-2" doc:id="ae2800c0-bf1a-428d-b556-3e0edf00f1e5" message="#['\n']&#10;----------------&#10;#['\n']&#10;----------------&gt; &quot;After sending mail:&quot;&#10;#['\n']&#10;----------------&#10;#['\n']"/>
+	</flow>
+    <flow name="post:\createAccount:application\json:vitech-customer-acct-creation-config">
+		<ee:transform doc:name="Transform Message" doc:id="847cec63-f575-4560-8842-9163e248097d" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="setInput" ><![CDATA[%dw 2.0
+output application/json
+---
+{
+customerName: attributes.queryParams.customerName ,
+bank: attributes.queryParams.bank ,
+acctType: attributes.queryParams.acctType ,
+branchName: attributes.queryParams.branchName ,
+email: payload.mailId as String ,
+accountNumber: payload.accountNumber as String ,
+atmPin: payload.atmPin ,
+ifscCode: payload.ifscCode, 
+mailId: payload.mailId as String , 
+phoneNumber: payload.contact as Number
+}]]></ee:set-variable>
+				<ee:set-variable variableName="inpPayload" ><![CDATA[%dw 2.0
+output application/json
+var inp = []
+---
+inp << payload reduce ((item, accumulator) -> item )]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<ee:cache doc:name="Cache" doc:id="6d2e19ac-ee1b-4a6b-bd39-7e0e0e0fb3f8" cachingStrategy-ref="Caching_Strategy">
+			<logger level="INFO" doc:name="Logg For Database" doc:id="797242f5-5247-4710-b203-b7b69fe74af3" message="#['\n']&#10;-----------------&#10;#['\n']&#10;-----------------&gt; Log the DB"/>
+			<snowflake:select doc:name="Verify Database" doc:id="656eaefa-7f58-40f3-a799-0974282e6bb6" config-ref="Snowflake_Config">
+			<snowflake:sql><![CDATA[SELECT custAccNum, bankName
+FROM VITECH.BFS.BANK_TRANSACTIONS
+WHERE custAccNum = :custAccNum ;]]></snowflake:sql>
+			<snowflake:input-parameters><![CDATA[#[%dw 2.0
+output application/java
+---   
+{
+"custAccNum": vars.setInput.accountNumber  , 
+"bankName": vars.setInput.bank
+}]]]></snowflake:input-parameters>
+		</snowflake:select>
+		</ee:cache>
+		<choice doc:name="Choice" doc:id="3ce9acc3-ce2c-4e97-9713-6b3b26a99f1e" >
+			<when expression="#[sizeOf(payload) &gt;= 1]">
+				<logger level="INFO" doc:name="the record is exist in DB" doc:id="cd0b5bec-608c-4f6e-9227-6dbdfd146969" message="#['\n']&#10;----------------------------&#10;#['\n']&#10;&quot;The customer account is already exist in DB&quot;&#10;#['\n']&#10;---------------------------&#10;#['\n']"/>
+				<ee:transform doc:name="Transform Message" doc:id="fac5d1d1-a7ca-424a-bda5-18dccc6ae80a">
+					<ee:message>
+						<ee:set-payload><![CDATA[ %dw 2.0
+output application/json
+---
+{
+  status: "SUCCESS",
+  message: "Account " ++ vars.setInput.accountNumber  ++ " already exist with " ++ vars.setInput.bank
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</when>
+			<otherwise >
+				<snowflake:insert doc:name="Insert" doc:id="c233d283-8e59-42dd-b711-35394e878d86" config-ref="Snowflake_Config">
+					<snowflake:sql ><![CDATA[Insert into VITECH.BFS.BANK_TRANSACTIONS (custName , custAccNum , atmPin , bankName , accountType , ifscCode , branchName , 
+transactionTimeStamp , mailId , phoneNumber)
+VALUES
+(:custName , :custAccNum , :atmPin , :bankName , :accountType , :ifscCode , :branchName , :transactionTimeStamp ,
+:mailId , :phoneNumber)]]></snowflake:sql>
+					<snowflake:input-parameters ><![CDATA[#[output application/java
+---
+{
+	custName: vars.setInput.customerName,
+	custAccNum: vars.inpPayload.accountNumber,
+	atmPin: vars.inpPayload.atmPin,
+	bankName: vars.setInput.bank,
+	accountType: vars.setInput.acctType,
+	ifscCode: vars.inpPayload.ifscCode,
+	branchName: vars.setInput.branchName,
+	transactionTimeStamp: now() as String {
+		format: "yyyy-MM-dd HH:mm:ss"
+	},
+	mailId: vars.inpPayload.mailId,
+	phoneNumber: vars.inpPayload.contact
+}]]]></snowflake:input-parameters>
+				</snowflake:insert>
+				<flow-ref doc:name="flow ref" doc:id="80a3ce80-ec93-49d9-87e4-b17fe0a871a8" name="vitech-customer-acct-email"/>
+				<ee:transform doc:name="Transform Message">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+"Success": "Account Created Successfully with "++ vars.setInput.accountNumber ++ " Account Number"
+
+} 
+]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+				<logger level="INFO" doc:name="successful insertion" doc:id="7817c1e8-0c3e-47b3-9b38-5a9c08739ff8" message="#['\n']&#10;----------------&#10;#['\n']&#10;&#10;----------------&gt; &quot;Account created successfully for the given input&quot;&#10;&#10;#['\n']&#10;----------------&#10;#['\n']"/>
+			</otherwise>
+		</choice>
+    </flow>
+</mule>

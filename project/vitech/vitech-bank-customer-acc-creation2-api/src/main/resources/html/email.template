@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+body{
+text-align: center ;
+}
+table{
+margin: 0 auto ;
+height: 20vh ;
+width: 40 vh;
+}
+
+h1{
+color: green ;
+}
+
+h4{
+color: red ;
+}
+</style>
+</head>
+<body>
+<h1>Welcome to #[vars.dbResult.bankName]</h1>
+<h3>#[vars.emailBody]</h3>
+<h4> Note: This is an automated email please do not reply to this email</h5>
+<a href="https://youtube.com/playlist?list=PLFPnaYaZXRwyq_1My8Uiw0h763LH_HIlf&si=5sehQ59CEKl7Prwu">Visit VITech Talk!</a>
+</body>
+</html>
+

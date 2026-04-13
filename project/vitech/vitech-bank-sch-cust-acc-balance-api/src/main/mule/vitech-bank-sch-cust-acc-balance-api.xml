@@ -6,36 +6,28 @@
 http://www.mulesoft.org/schema/mule/snowflake http://www.mulesoft.org/schema/mule/snowflake/current/mule-snowflake.xsd
 http://www.mulesoft.org/schema/mule/email http://www.mulesoft.org/schema/mule/email/current/mule-email.xsd
 http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
-	
-		
-	
-	<flow name="vitech-bank-sch-cust-acc-balance-apiFlow" doc:id="3c69bfe4-c26f-4269-b99d-300b469cdf8a" >
-		<scheduler doc:name="Scheduler" doc:id="3d72f24e-eab8-4ca3-990c-93c2e56c13f9" >
+
+	<flow name="vitech-bank-sch-cust-acc-balance-apiFlow" doc:id="dd17f579-9037-4de0-96ad-75187bb65e9c" >
+		<scheduler doc:name="Scheduler" doc:id="af1adf5a-831d-450c-bc51-85a545d71bca" >
 			<scheduling-strategy >
-				<cron expression="0 0/2 * 1/1 * ? *" timeZone="Asia/Kolkata"/>
+				<fixed-frequency frequency="1" timeUnit="MINUTES" />
 			</scheduling-strategy>
 		</scheduler>
-		<logger level="TRACE" doc:name="Logger" doc:id="dc88201c-882f-4933-be49-4abe24c9b686" message="#['\n'] #['\n']&#10; Batch job has started:&#10;#['\n'] #['\n']"/>
-		<snowflake:select doc:name="Select" doc:id="d1d00b7c-6043-4262-8ccd-2f169a94a4ec" config-ref="Snowflake_Config00">
-			<snowflake:sql ><![CDATA[SELECT * FROM Bank_Transactions;]]></snowflake:sql>
+		<logger level="INFO" doc:name="Logger" doc:id="a1b9563e-6dcc-4181-9a22-874b82d3bc11" message="#['\n'] #['\n']&#10; Batch job has started:&#10;#['\n'] #['\n']"/>
+		<snowflake:select doc:name="Select" doc:id="7130bb89-573c-4c07-a7f0-d66ad0f4b965" config-ref="Snowflake_Config">
+			<snowflake:sql ><![CDATA[SELECT * FROM VITECH.BFS.BANK_TRANSACTIONS ;]]></snowflake:sql>
 		</snowflake:select>
-		<foreach doc:name="For Each" doc:id="6f69e8d3-2e7c-4087-acbe-e2acd842fd68" >
-			<ee:transform doc:name="Transform Message" doc:id="292d0e09-a359-4aa1-91ae-b6a52b7566f6" >
-				<ee:message >
-					<ee:set-payload ><![CDATA[%dw 2.0
-output application/json
----
-payload]]></ee:set-payload>
-				</ee:message>
-			</ee:transform>
-			<email:send doc:name="Send The Bloddy Mail" doc:id="ee32aa56-19c4-4000-aba0-49e664607330" config-ref="Email_SMTP_Config" fromAddress="${email.user}" subject="#[&quot;Today's Total Balance:&quot; ++ payload.BANKNAME]">
+		<foreach doc:name="For Each" doc:id="6c49fd2f-2978-4db8-baef-7bef79f915cf" >
+			<set-variable value="#[payload]" doc:name="Store Result Of Database" doc:id="c42ac72f-4ac3-4497-9705-da18e1443e56" variableName="dbResult"/>
+			<set-variable value="#[&quot;Your Total Balance as On Today's: &quot; ++ payload.TOTALBALANCE as String ++ &quot; of &quot; &#10;++ payload.BANKNAME as String]" doc:name="Email Body" doc:id="3ea1710c-2a5c-4641-8eb4-ce105223f60e" variableName="emailBody"/>
+			<parse-template doc:name="Parse Template" doc:id="2fe51c1d-dd84-4248-8e5b-5036c6bd2995" location="html\email.template"/>
+			<email:send doc:name="Send" doc:id="d15c509d-45eb-4cee-908c-1110c728317c" config-ref="Email_SMTP" fromAddress="${email.user}" subject="#[&quot;Today's Total Balance: &quot; ++ vars.dbResult.BANKNAME]">
 				<email:to-addresses >
-					<email:to-address value="#[payload.MAILID as String]" />
+					<email:to-address value="#[vars.dbResult.MAILID]" />
 				</email:to-addresses>
-				<email:body >
-					<email:content ><![CDATA[#["Your Total Balance as On Today's:" ++ payload.BANKNAME]]]></email:content>
-				</email:body>
+				<email:body contentType="text/html" encoding="UTF-8" />
 			</email:send>
+			<logger level="INFO" doc:name="Logger" doc:id="4929f6fe-df21-42bc-8f90-20da4260ab3b" message="#['\n'] &#10;-------------------&#10;#['\n']&#10;&#10;&quot;Email send for User: &quot; #[vars.dbResult.MAILID]&#10;&#10;#['\n']&#10;--------------------&#10;#['\n']"/>
 		</foreach>
 	</flow>
 </mule>

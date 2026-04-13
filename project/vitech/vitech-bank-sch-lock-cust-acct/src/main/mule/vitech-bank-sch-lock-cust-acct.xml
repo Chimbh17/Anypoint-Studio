@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:email="http://www.mulesoft.org/schema/mule/email"
+	xmlns:snowflake="http://www.mulesoft.org/schema/mule/snowflake"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/snowflake http://www.mulesoft.org/schema/mule/snowflake/current/mule-snowflake.xsd
+http://www.mulesoft.org/schema/mule/email http://www.mulesoft.org/schema/mule/email/current/mule-email.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="vitech-bank-sch-lock-cust-acctFlow" doc:id="16fd8f78-d509-4f57-9dd5-de78976efec9" >
+		<scheduler doc:name="Scheduler" doc:id="663c5790-5187-4832-91b1-4666c806898b" >
+			<scheduling-strategy >
+				<fixed-frequency frequency="1" timeUnit="MINUTES"/>
+			</scheduling-strategy>
+		</scheduler>
+		<logger level="INFO" doc:name="Flow Triggered" doc:id="d8be900c-2b06-432b-8d83-74b0c26ae086" message="#['\n']&#10;------------------&#10;#['\n']&#10;------------------&gt; Scheduler start for Lock(Deactive) accounts.&#10;#['\n']&#10;------------------&#10;#['\n']"/>
+		<snowflake:select doc:name="Select Lock Accounts" doc:id="b6eb1524-46f1-400f-b1d3-defec041a35c" config-ref="Snowflake_Config">
+			<snowflake:sql><![CDATA[SELECT * FROM VITECH.BFS.BANK_TRANSACTIONS 
+WHERE ACCOUNTSTATUS = :accountStatus ;]]></snowflake:sql>
+			<snowflake:input-parameters><![CDATA[#[%dw 2.0
+output application/java
+---
+{
+	"accountStatus": 'Deactive'
+}]]]></snowflake:input-parameters>
+		</snowflake:select>
+		<foreach doc:name="For Each" doc:id="322dad92-2fe9-4291-8599-2c8d0fc39a86" >
+			<logger level="INFO" doc:name="Before Sending Mail" doc:id="edb0d209-855a-4244-b982-d2225a4ca37f" message="#['\n']&#10;-----------------&#10;#['\n']&#10;-----------------&gt; Before sending email&#10;#['\n']&#10;-----------------&#10;#['\n']" />
+			<set-variable value="#[payload]" doc:name="Store Result Of Database" doc:id="06e3b0fd-71ca-455a-91b5-f14160fe9b16" variableName="dbResult" />
+			<set-variable value='#[%dw 2.0&#10;output application/json&#10;---&#10;"Your account is temporarily locked with account number $(vars.dbResult.CUSTACCNUM) of $(vars.dbResult.BANKNAME) bank please unlock it use our website or contact customer care No: 0456-258733"]' doc:name="Email Body" doc:id="0350a477-f973-4dda-b446-46f83fac461b" variableName="emailBody" />
+			<parse-template doc:name="Parse Template" doc:id="9e119455-96e6-4831-a528-9cb48df60f9c" location="html\email.template" />
+			<email:send doc:name="Email Send" doc:id="37dfef71-b7e4-40ab-908f-8b0f34a02cc3" config-ref="check-balance-gmailConfig" fromAddress="${email.user}" subject="Your account status is Locked.">
+				<email:to-addresses>
+					<email:to-address value="#[vars.dbResult.MAILID]" />
+				</email:to-addresses>
+				<email:body contentType="text/html" encoding="UTF-8">
+				</email:body>
+			</email:send>
+			<logger level="INFO" doc:name="After Sending Mail" doc:id="78f25a2b-502e-4172-b5fd-1155ee1ff1f5" message="#['\n']&#10;-----------------&#10;#['\n']&#10;-----------------&gt; Email Send successfully for #[vars.dbResult.MAILID]&#10;#['\n']&#10;-----------------&#10;#['\n']" />
+		</foreach>
+	</flow>
+</mule>

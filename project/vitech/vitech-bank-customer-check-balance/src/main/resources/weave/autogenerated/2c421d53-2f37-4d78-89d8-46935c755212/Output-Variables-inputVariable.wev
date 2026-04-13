@@ -1,0 +1,9 @@
+%dw 2.0
+
+type auto_2c421d53_2f37_4d78_89d8_46935c755212_Output_Variables_inputVariable = {|
+  bankName: "ICICI" | "HDFC" | "SBI" | "AXIS", 
+  accountType: "current" | "savings", 
+  accountNumber: String, 
+  atmPin: String
+|}
+

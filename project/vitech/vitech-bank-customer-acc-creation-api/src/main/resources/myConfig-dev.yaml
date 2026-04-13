@@ -1,0 +1,16 @@
+http:
+  port: "8081"
+
+db:
+  sfc:
+    accountName: "BZAXLZZ-BJ08531"
+    warehouse: "COMPUTE_WH"
+    database: "VITECH"
+    schema: "BFS"
+    user: "Alchemist17"
+    password: "A9284799919@chim"
+    role: "ACCOUNTADMIN" 
+ 
+
+  
+#${db.sfc.role}

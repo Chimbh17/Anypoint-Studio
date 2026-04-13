@@ -4,5 +4,3 @@ http:
 
 
 
-# ${http.host}
-# <http:listener-connection host="localhost" port="8081" />
